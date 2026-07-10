@@ -24,95 +24,13 @@
     </section>
 
     <section style="padding-top: 0;">
-        <div class="container grid grid-2">
-            <div>
-                <h3 style="margin-bottom: 2rem;">What to Expect</h3>
-                <div class="step-block">
-                    <div class="step">
-                        <div class="step-number">1</div>
-                        <div class="step-content">
-                            <h4>Book a Time</h4>
-                            <p>Find a slot on the calendar that works for you. Space is strictly limited each week.</p>
-                        </div>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">2</div>
-                        <div class="step-content">
-                            <h4>Answer a Few Questions</h4>
-                            <p>While booking your time, you'll answer a few quick questions. This gives me the context I need so we don't waste time on the call.</p>
-                        </div>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">3</div>
-                        <div class="step-content">
-                            <h4>The Strategy Call</h4>
-                            <p>We'll map out a custom action plan. If we're a good fit to work together, we can discuss that. If not, you walk away with immense clarity.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <h3 style="margin-top: 4rem; margin-bottom: 2rem;">Frequently Asked Questions</h3>
-                <div class="faq-accordion">
-                    <div class="faq-item">
-                        <div class="faq-question">
-                            Is this just a sales call?
-                            <span class="faq-icon">+</span>
-                        </div>
-                        <div class="faq-answer">
-                            No. While we may discuss our paid programs if there's a fit, the primary goal of this call is to provide you with a tangible strategy you can implement immediately.
-                        </div>
-                    </div>
-                    <div class="faq-item">
-                        <div class="faq-question">
-                            How long is the call?
-                            <span class="faq-icon">+</span>
-                        </div>
-                        <div class="faq-answer">
-                            Block out 45 minutes. We respect your time and aim to be as concise and impactful as possible.
-                        </div>
-                    </div>
-                    <div class="faq-item">
-                        <div class="faq-question">
-                            Who is this for?
-                            <span class="faq-icon">+</span>
-                        </div>
-                        <div class="faq-answer">
-                            Coaches, consultants, and service providers who are currently stuck at a revenue plateau and want systems to scale.
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div>
-                <div class="lead-form" style="padding: 0; background: rgba(0, 0, 0, 0.03); overflow: hidden;">
-                    <!-- Google Calendar Appointment Scheduling begin -->
-                    <iframe src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0QzQ_BNukTtM-03_2yb4r3fscZhKTs42_JhRYwyWhRVUv6qkczcBLnNgfPLqPwsCAkT6DUXd-_?gv=true" style="border: 0; width: 100%; min-height: 900px; display: block;" frameborder="0"></iframe>
-                    <!-- end Google Calendar Appointment Scheduling -->
-                </div>
+        <div class="container" style="max-width: 900px; margin: 0 auto;">
+            <div class="lead-form" style="padding: 0; background: rgba(0, 0, 0, 0.03); overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-radius: 12px;">
+                <!-- Google Calendar Appointment Scheduling begin -->
+                <iframe src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ0QzQ_BNukTtM-03_2yb4r3fscZhKTs42_JhRYwyWhRVUv6qkczcBLnNgfPLqPwsCAkT6DUXd-_?gv=true" style="border: 0; width: 100%; min-height: 900px; display: block;" frameborder="0"></iframe>
+                <!-- end Google Calendar Appointment Scheduling -->
             </div>
         </div>
     </section>
-
-    <script>
-        // Simple FAQ Toggle Logic
-        document.querySelectorAll('.faq-question').forEach(button => {
-            button.addEventListener('click', () => {
-                const item = button.parentElement;
-                const isActive = item.classList.contains('active');
-                
-                // Close all
-                document.querySelectorAll('.faq-item').forEach(faq => {
-                    faq.classList.remove('active');
-                    faq.querySelector('.faq-icon').textContent = '+';
-                });
-
-                // Open clicked if it wasn't active
-                if (!isActive) {
-                    item.classList.add('active');
-                    item.querySelector('.faq-icon').textContent = '×';
-                }
-            });
-        });
-    </script>
 </body>
 </html>
