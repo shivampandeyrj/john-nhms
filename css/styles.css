@@ -91,14 +91,13 @@ section {
   font-size: 1.1rem;
   padding: 1rem 2.5rem;
   border: none;
-  border-radius: 0; /* Sharp corners */
+  border-radius: 8px; /* Smooth rounded corners */
   cursor: pointer;
   transition: var(--transition-smooth);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   position: relative;
   overflow: hidden;
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%); /* Slight angle */
 }
 
 .btn:hover {
@@ -176,8 +175,8 @@ section {
   background: rgba(0, 0, 0, 0.03);
   padding: 3rem;
   border: 1px solid var(--color-border);
+  border-radius: 16px;
   backdrop-filter: blur(10px);
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
 }
 
 .trust-strip {
