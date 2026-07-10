@@ -2,7 +2,7 @@
  * NHMS Apps Script Backend
  * 
  * 1. Create a Google Sheet named "NHMS Leads"
- * 2. Create a tab named "Leads" (Columns: Timestamp, Name, Email, Magnet Type)
+ * 2. Create a tab named "Leads" (Columns: Timestamp, Name, Email, Phone, Magnet Type)
  * 3. Go to Extensions > Apps Script and paste this code.
  * 4. Deploy > New Deployment > Web App (Execute as: Me, Who has access: Anyone)
  * 5. Copy the Web App URL and paste it into js/main.js
@@ -24,6 +24,7 @@ function doPost(e) {
 
     const name = data.name || 'Unknown';
     const email = data.email || 'Unknown';
+    const phone = data.phone || 'Unknown';
     const magnetType = data.magnetType || 'Unknown';
     const timestamp = new Date();
 
@@ -32,13 +33,13 @@ function doPost(e) {
     if (!sheet) {
       throw new Error(`Sheet '${SHEET_NAME}' not found.`);
     }
-    sheet.appendRow([timestamp, name, email, magnetType]);
+    sheet.appendRow([timestamp, name, email, phone, magnetType]);
 
     // 2. Send the Resource Email to the User
     sendResourceEmail(name, email, magnetType);
 
     // 3. Send Alert Email to Joel (Client)
-    sendAlertEmail(name, email, magnetType);
+    sendAlertEmail(name, email, phone, magnetType);
 
     // Return success
     return ContentService.createTextOutput(JSON.stringify({ "status": "success" }))
@@ -91,9 +92,9 @@ function sendResourceEmail(name, email, magnetType) {
   });
 }
 
-function sendAlertEmail(name, email, magnetType) {
+function sendAlertEmail(name, email, phone, magnetType) {
   const subject = `🔥 New Lead: ${name} (${magnetType})`;
-  const body = `You got a new lead!\n\nName: ${name}\nEmail: ${email}\nMagnet: ${magnetType}\n\nView Sheet: ${SpreadsheetApp.getActiveSpreadsheet().getUrl()}`;
+  const body = `You got a new lead!\n\nName: ${name}\nEmail: ${email}\nPhone: ${phone}\nMagnet: ${magnetType}\n\nView Sheet: ${SpreadsheetApp.getActiveSpreadsheet().getUrl()}`;
   
   MailApp.sendEmail(NOTIFICATION_EMAIL, subject, body);
 }
