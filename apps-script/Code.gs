@@ -63,10 +63,10 @@ function sendResourceEmail(name, email, magnetType) {
   let body = "";
   
   // NOTE: You can attach files from Google Drive here or include direct links.
-  if (magnetType === "10k-blueprint") {
-    subject = "Here is your 10K Blueprint 🚀";
+  if (magnetType === "10k-roadmap") {
+    subject = "Here is your 10K Roadmap 🚀";
     body = `Hi ${name},\n\n` +
-           `Welcome to NHMS. As promised, here is the link to download your 10K Blueprint:\n\n` +
+           `Welcome to NHMS. As promised, here is the link to download your 10K Roadmap:\n\n` +
            `[INSERT LINK TO GOOGLE DRIVE PDF OR HOSTED PDF HERE]\n\n` +
            `If you're serious about scaling, let's map out your custom plan on a 1-on-1 strategy call. You can book a time here:\n` +
            `https://yourdomain.com/call\n\n` +
