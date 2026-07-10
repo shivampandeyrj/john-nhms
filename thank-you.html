@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+    <div class="accent-cut" style="top: -50px; left: -50px; width: 200px; height: 500px;"></div>
+    
     <nav style="padding: 0; text-align: center; border-bottom: 1px solid var(--color-border); margin-bottom: 1rem;">
         <div class="container" style="display: flex; justify-content: center;">
             <a href="/" style="display: inline-block;">
@@ -15,31 +17,33 @@
         </div>
     </nav>
 
-    <section class="hero" style="min-height: 80vh; padding: 4rem 1rem; display: flex; align-items: center; justify-content: center; background-color: #FAFAFA;">
-        <div class="thank-you-card" style="background: #FFFFFF; border: 1px solid #EAEAEA; padding: 3.5rem 3rem; text-align: center; max-width: 650px; width: 100%;">
-            
-            <div class="icon-wrapper" style="width: 70px; height: 70px; background: var(--color-teal); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem;">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            </div>
-            
-            <h1 style="font-size: clamp(2.5rem, 5vw, 3rem); margin-bottom: 0.5rem; color: #111; font-weight: 700; letter-spacing: -0.01em;">You're <span class="text-teal">In.</span></h1>
-            <p style="font-size: 1.15rem; color: #555; margin-bottom: 3rem; font-weight: 400;">Check your inbox. Your resource is on its way.</p>
-            
-            <hr style="border: 0; border-top: 1px solid #EAEAEA; margin: 2rem 0;">
-
-            <div style="margin-bottom: 3rem; text-align: left;">
-                <h3 style="font-size: 1.4rem; margin-bottom: 0.75rem; color: #111; font-weight: 600;">Want to accelerate your results?</h3>
-                <p style="color: #555; margin-bottom: 1.5rem; font-size: 1.05rem; line-height: 1.6;">Don't wait for the resource. Book a free strategy call right now to map out your custom scale plan.</p>
-                <a href="/call" class="btn" style="border-radius: 4px; display: block; text-align: center; font-size: 1rem; padding: 1rem;">Book Strategy Call</a>
+    <section class="hero" style="padding-top: 1rem; padding-bottom: 2rem; min-height: calc(100vh - 120px); display: flex; align-items: center;">
+        <div class="container grid grid-2" style="align-items: center; gap: 4rem;">
+            <div>
+                <div style="width: 60px; height: 60px; background: var(--color-teal); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--color-bg)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <h1 style="font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -0.02em;">You're <span class="text-teal">In.</span></h1>
+                <p style="font-size: 1.15rem; line-height: 1.6; margin-bottom: 2.5rem; color: var(--color-text-secondary);">Check your inbox. Your resource is on its way.</p>
+                
+                <h3 style="margin-bottom: 1rem;">Want to accelerate your results?</h3>
+                <p style="font-size: 1.05rem; line-height: 1.6; margin-bottom: 1.5rem; color: var(--color-text-secondary);">Don't wait for the resource. Book a free strategy call right now to map out your custom scale plan with our team.</p>
+                <a href="/call" class="btn btn-outline" style="width: 100%; max-width: 300px; padding: 1rem;">Book Strategy Call</a>
             </div>
 
-            <hr style="border: 0; border-top: 1px solid #EAEAEA; margin: 2rem 0;">
+            <div>
+                <div class="lead-form">
+                    <h3 style="margin-bottom: 1rem; font-size: 1.8rem;">Next Step: Join the 5-Day Webinar</h3>
+                    <p style="margin-bottom: 2rem; color: var(--color-text-secondary); line-height: 1.6;">Ready to take the next big leap? Join our exclusive 5-Day live training to master your mindset and scale your income.</p>
+                    
+                    <ul class="benefits-list" style="margin-bottom: 2rem;">
+                        <li style="margin-bottom: 0.75rem; font-size: 1rem;">Live coaching directly from John Atkins</li>
+                        <li style="margin-bottom: 0.75rem; font-size: 1rem;">Interactive Q&A sessions to break your blocks</li>
+                        <li style="margin-bottom: 0.75rem; font-size: 1rem;">A community of high-performers</li>
+                    </ul>
 
-            <div style="text-align: left; padding: 2rem; background-color: #F4F7F8; border-left: 4px solid var(--color-teal);">
-                <div style="font-size: 0.85rem; font-weight: 600; letter-spacing: 1px; margin-bottom: 0.5rem; text-transform: uppercase; color: var(--color-teal);">Next Step</div>
-                <h3 style="font-size: 1.6rem; margin-bottom: 0.75rem; color: #111; font-weight: 600;">Join the 5-Day Webinar</h3>
-                <p style="color: #444; margin-bottom: 1.5rem; font-size: 1.05rem; line-height: 1.6;">Ready to take the next big leap? Join our exclusive 5-Day live training to master your mindset and scale your income.</p>
-                <a href="#" class="btn" style="background: #111; color: white; border-radius: 4px; display: block; text-align: center; font-size: 1.05rem; padding: 1.1rem; border: none; clip-path: none;">JOIN THE WEBINAR NOW</a>
+                    <a href="#" class="btn" style="width: 100%; padding: 1.25rem;">JOIN THE WEBINAR NOW</a>
+                </div>
             </div>
         </div>
     </section>
