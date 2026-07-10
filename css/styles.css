@@ -1,12 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 :root {
-  --color-bg: #0F0D0E;
+  --color-bg: #FFFFFF;
   --color-teal: #478A9A;
   --color-teal-hover: #3a717e;
-  --color-text-primary: #EEEEEE;
+  --color-text-primary: #0F0D0E;
   --color-text-secondary: #4A4A4A;
-  --color-border: #2A2A2A;
+  --color-border: #E0E0E0;
 
   --font-heading: 'Space Grotesk', sans-serif;
   --font-body: 'Inter', sans-serif;
@@ -173,7 +173,7 @@ section {
 }
 
 .lead-form {
-  background: rgba(42, 42, 42, 0.3);
+  background: rgba(0, 0, 0, 0.03);
   padding: 3rem;
   border: 1px solid var(--color-border);
   backdrop-filter: blur(10px);
@@ -340,7 +340,7 @@ section {
 
 /* Admin Dashboard Specific */
 .admin-card {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(0, 0, 0, 0.02);
   border: 1px solid var(--color-border);
   padding: 2rem;
   margin-bottom: 2rem;
