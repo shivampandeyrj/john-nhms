@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Your Strategy Call | NHMS</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <meta name="description" content="Book your 1-on-1 strategy session to map out your scale plan.">
+</head>
+<body>
+    <header class="container" style="padding-top: 2rem; text-align: center;">
+        <a href="/" style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.5rem; color: var(--color-text-primary);">
+            <div style="width: 20px; height: 20px; background: var(--color-teal); clip-path: polygon(0 0, 100% 0, 50% 100%);"></div>
+            NHMS
+        </a>
+    </header>
+
+    <section style="padding-top: 3rem; padding-bottom: 3rem;">
+        <div class="container" style="max-width: 800px; text-align: center;">
+            <h1 style="font-size: clamp(2rem, 4vw, 3rem);">Map Out Your <span class="text-teal">Scale Plan</span></h1>
+            <p style="margin-bottom: 0;">A 45-minute deep dive to identify your bottlenecks and build a custom blueprint for your coaching business.</p>
+        </div>
+    </section>
+
+    <section style="padding-top: 0;">
+        <div class="container grid grid-2">
+            <div>
+                <h3 style="margin-bottom: 2rem;">What to Expect</h3>
+                <div class="step-block">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Book a Time</h4>
+                            <p>Find a slot on the calendar that works for you. Space is strictly limited each week.</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Complete Prep Form</h4>
+                            <p>After booking, you'll be redirected to a short form. This gives me the context I need so we don't waste time on the call.</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>The Strategy Call</h4>
+                            <p>We'll map out a custom action plan. If we're a good fit to work together, we can discuss that. If not, you walk away with immense clarity.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 4rem; margin-bottom: 2rem;">Frequently Asked Questions</h3>
+                <div class="faq-accordion">
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            Is this just a sales call?
+                            <span class="faq-icon">+</span>
+                        </div>
+                        <div class="faq-answer">
+                            No. While we may discuss our paid programs if there's a fit, the primary goal of this call is to provide you with a tangible strategy you can implement immediately.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            How long is the call?
+                            <span class="faq-icon">+</span>
+                        </div>
+                        <div class="faq-answer">
+                            Block out 45 minutes. We respect your time and aim to be as concise and impactful as possible.
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            Who is this for?
+                            <span class="faq-icon">+</span>
+                        </div>
+                        <div class="faq-answer">
+                            Coaches, consultants, and service providers who are currently stuck at a revenue plateau and want systems to scale.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="lead-form" style="padding: 1rem; height: 700px; display: flex; align-items: center; justify-content: center; background: rgba(15, 13, 14, 0.8);">
+                    <!-- Placeholder for Google Calendar Appointment Schedule Embed -->
+                    <div style="text-align: center; width: 100%;">
+                        <p class="text-teal" style="font-weight: bold; margin-bottom: 1rem;">[Google Calendar Embed Area]</p>
+                        <p style="font-size: 0.9rem; color: var(--color-text-secondary);">The Google Calendar Appointment Schedule iframe goes here.</p>
+                        <p style="font-size: 0.9rem; color: var(--color-text-secondary);">Client will paste their embed code in this div.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Simple FAQ Toggle Logic
+        document.querySelectorAll('.faq-question').forEach(button => {
+            button.addEventListener('click', () => {
+                const item = button.parentElement;
+                const isActive = item.classList.contains('active');
+                
+                // Close all
+                document.querySelectorAll('.faq-item').forEach(faq => {
+                    faq.classList.remove('active');
+                    faq.querySelector('.faq-icon').textContent = '+';
+                });
+
+                // Open clicked if it wasn't active
+                if (!isActive) {
+                    item.classList.add('active');
+                    item.querySelector('.faq-icon').textContent = '×';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

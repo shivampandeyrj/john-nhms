@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | NHMS</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .admin-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+        .sidebar {
+            background-color: #0a0809;
+            padding: 2rem;
+            border-right: 1px solid var(--color-border);
+        }
+        .sidebar-nav {
+            list-style: none;
+            margin-top: 2rem;
+        }
+        .sidebar-nav li {
+            margin-bottom: 1rem;
+        }
+        .sidebar-nav a {
+            color: var(--color-text-secondary);
+            font-weight: 500;
+        }
+        .sidebar-nav a.active, .sidebar-nav a:hover {
+            color: var(--color-teal);
+        }
+        .main-content {
+            padding: 3rem;
+        }
+        .config-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--color-border);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--color-border);
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: var(--color-text-primary);
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--color-teal);
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Simple Mockup of Admin Dashboard. In reality, this would be gated via Google Identity Services or Firebase Auth -->
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+                <div style="width: 20px; height: 20px; background: var(--color-teal); clip-path: polygon(0 0, 100% 0, 50% 100%);"></div>
+                NHMS
+            </div>
+            
+            <ul class="sidebar-nav">
+                <li><a href="#" class="active">Lead Magnets</a></li>
+                <li><a href="#">Links & Redirects</a></li>
+                <li><a href="#">Leads (Google Sheet)</a></li>
+                <li><a href="#">Settings</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <h2 style="margin-bottom: 2rem;">Manage Lead Magnets</h2>
+            
+            <div class="config-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3>10K Blueprint</h3>
+                    <label class="toggle-switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Google Drive PDF Link</label>
+                    <input type="text" class="form-control" value="https://drive.google.com/file/d/example/view">
+                </div>
+                <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Save Changes</button>
+            </div>
+
+            <div class="config-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3>Morning Routine</h3>
+                    <label class="toggle-switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Google Drive PDF Link</label>
+                    <input type="text" class="form-control" value="https://drive.google.com/file/d/example2/view">
+                </div>
+                <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Save Changes</button>
+            </div>
+            
+            <h2 style="margin-bottom: 2rem; margin-top: 4rem;">Global Links</h2>
+            
+            <div class="config-card">
+                <div class="form-group">
+                    <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Google Calendar Embed Source URL (for /call)</label>
+                    <input type="text" class="form-control" value="https://calendar.google.com/calendar/appointments/schedules/AcZssZ...">
+                </div>
+                <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Save Calendar Link</button>
+            </div>
+
+            <p style="color: var(--color-text-secondary); font-size: 0.9rem; margin-top: 2rem;">
+                Note: This dashboard requires connection to Google Apps Script `doGet()` and `doPost()` to save configurations to the Google Sheet Config tab dynamically.
+            </p>
+        </main>
+    </div>
+</body>
+</html>
