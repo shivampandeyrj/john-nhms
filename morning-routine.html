@@ -17,27 +17,17 @@
         </div>
     </header>
 
-    <section class="hero">
+    <section class="hero" style="min-height: auto; padding: 4rem 0;">
         <div class="container grid grid-2" style="align-items: center;">
             <div>
-                <h1>Win the Morning, <br><span class="text-teal">Win the Day</span></h1>
-                <p>Stop waking up reactive. This step-by-step morning routine is engineered to optimize your energy, focus, and drive from the minute you open your eyes.</p>
-                
-                <ul class="benefits-list">
-                    <li>The 20-minute protocol to activate peak focus</li>
-                    <li>How to eliminate decision fatigue before 9 AM</li>
-                    <li>Nutritional and physiological priming for entrepreneurs</li>
-                </ul>
-
-                <div class="social-proof">
-                    <div class="quote">"I used to hit snooze and scroll social media. Now I'm done with my deep work by 10 AM. Game changer."</div>
-                    <div class="author">Sarah T. — Founder</div>
-                </div>
+                <h1>Win The Day Before <span class="text-teal">The World Wakes Up</span></h1>
+                <h3 style="margin-top: 1rem; color: var(--color-text-secondary); font-family: var(--font-body); font-weight: 400;">7-Step Guide for Transforming your Life - One Morning at a Time</h3>
+                <p style="margin-top: 1.5rem; font-size: 1.25rem;">The same simple routine behind sharper focus, faster decisions, and the kind of momentum that changes everything.</p>
             </div>
 
             <div>
                 <form class="lead-form" id="leadForm">
-                    <h3 style="margin-bottom: 2rem;">Download the Routine</h3>
+                    <h3 style="margin-bottom: 2rem; font-size: 1.5rem; line-height: 1.3;">Download The Morning Routine Of High Achievers Guide</h3>
                     <input type="hidden" name="magnetType" value="morning-routine">
                     
                     <div class="form-group">
@@ -47,9 +37,16 @@
                     <div class="form-group">
                         <input type="email" class="form-control" name="email" placeholder="Email Address" required>
                     </div>
+
+                    <div style="display: flex; align-items: flex-start; gap: 0.5rem; margin-top: 1.5rem; margin-bottom: 1rem;">
+                        <input type="checkbox" id="consent" required style="margin-top: 0.25rem;">
+                        <label for="consent" style="font-size: 0.85rem; color: var(--color-text-secondary); line-height: 1.4;">
+                            I consent to receiving communications from NHMS via email. (You may opt out of communications at any time.)
+                        </label>
+                    </div>
                     
                     <button type="submit" class="btn" style="width: 100%; margin-top: 1rem;" id="submitBtn">
-                        Send Me the Guide
+                        Send Me The Routine
                         <div class="loader" id="submitLoader"></div>
                     </button>
                     
@@ -62,6 +59,45 @@
         </div>
     </section>
 
+    <section style="background-color: rgba(0,0,0,0.02); padding: 5rem 0;">
+        <div class="container" style="max-width: 800px; text-align: center;">
+            <h2 style="margin-bottom: 3rem;">Inside the Guide, You'll Discover:</h2>
+            <ul class="benefits-list" style="text-align: left; display: inline-block;">
+                <li style="margin-bottom: 1.5rem; font-size: 1.25rem;">The 7-step morning process top performers use to win the day.</li>
+                <li style="margin-bottom: 1.5rem; font-size: 1.25rem;">How to activate the identity of your goal achieved every morning.</li>
+                <li style="margin-bottom: 1.5rem; font-size: 1.25rem;">The simple routine that turns chaos into clarity — in 15 minutes or less.</li>
+            </ul>
+        </div>
+    </section>
+
+    <section style="padding: 5rem 0; text-align: center;">
+        <div class="container" style="max-width: 800px;">
+            <h2 style="font-size: 2.5rem; margin-bottom: 1rem;">Your morning is the foundation of your results.</h2>
+            <h2 style="font-size: 2.5rem; color: var(--color-teal); margin-bottom: 3rem;">Shift your mornings, and you'll shift your life.</h2>
+            
+            <h3 style="font-family: var(--font-body); font-weight: 500; margin-bottom: 2rem; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">This guide shows you how to do it - starting tomorrow.</h3>
+
+            <a href="#" onclick="document.getElementById('name').focus(); return false;" class="btn" style="font-size: 1.25rem; padding: 1.25rem 3rem;">
+                YES — SEND ME THE MORNING ROUTINE GUIDE
+            </a>
+            <p style="margin-top: 1rem; color: var(--color-text-secondary); font-size: 0.95rem;">Instant access. No fluff. Just the routine that works.</p>
+        </div>
+    </section>
+
+    <footer class="container" style="padding: 2rem; text-align: center; border-top: 1px solid var(--color-border); color: var(--color-text-secondary); font-size: 0.9rem;">
+        &copy; 2024 NHMS. All rights reserved.
+    </footer>
+
     <script src="js/main.js"></script>
+    <script>
+        // Scroll back to form when bottom button is clicked
+        document.querySelector('a[href="#"]').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelector('.lead-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => {
+                document.querySelector('input[name="name"]').focus();
+            }, 500);
+        });
+    </script>
 </body>
 </html>
