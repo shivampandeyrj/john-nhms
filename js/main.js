@@ -10,14 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (phoneInput) {
         iti = window.intlTelInput(phoneInput, {
             utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.0/build/js/utils.js",
-            initialCountry: "auto",
+            initialCountry: "gb", // Default to UK
             countrySearch: true, // Enables the search bar in the dropdown
-            geoIpLookup: function(success, failure) {
-                fetch("https://ipapi.co/json")
-                  .then(function(res) { return res.json(); })
-                  .then(function(data) { success(data.country_code); })
-                  .catch(function() { success("us"); });
-            },
         });
     }
 
