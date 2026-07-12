@@ -171,6 +171,15 @@ section {
   color: var(--color-text-secondary);
 }
 
+/* intl-tel-input overrides */
+.iti { 
+  width: 100%; 
+  display: block; 
+}
+.iti input {
+  width: 100% !important;
+}
+
 .lead-form {
   background: rgba(0, 0, 0, 0.03);
   padding: 3rem;
@@ -343,4 +352,70 @@ section {
   border: 1px solid var(--color-border);
   padding: 2rem;
   margin-bottom: 2rem;
+}
+
+/* Exit Intent Popup */
+.exit-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(5px);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.exit-popup-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.exit-popup-content {
+  background: var(--color-bg);
+  padding: 3rem;
+  border-radius: 16px;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  position: relative;
+  transform: translateY(20px);
+  transition: transform 0.3s ease;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.exit-popup-overlay.show .exit-popup-content {
+  transform: translateY(0);
+}
+
+.close-popup {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: transparent;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  line-height: 1;
+}
+
+.close-popup:hover {
+  color: var(--color-text-primary);
+}
+
+.exit-popup-content h2 {
+  color: var(--color-teal);
+  margin-bottom: 1rem;
+}
+
+.btn-popup-action {
+  width: 100%;
+  margin-top: 1.5rem;
 }
