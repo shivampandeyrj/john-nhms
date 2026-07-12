@@ -6,6 +6,19 @@
     <title>Book Your Strategy Call | NHMS</title>
     <link rel="stylesheet" href="css/styles.css">
     <meta name="description" content="Book your 1-on-1 strategy session to map out your scale plan.">
+    <style>
+        .booking-iframe {
+            border: 0;
+            width: 100%;
+            display: block;
+            height: 650px; /* Adjusted for mobile */
+        }
+        @media (min-width: 768px) {
+            .booking-iframe {
+                height: 800px; /* Taller for desktop */
+            }
+        }
+    </style>
 </head>
 <body>
     <nav style="padding: 0; text-align: center; border-bottom: 1px solid var(--color-border); margin-bottom: 1rem;">
@@ -27,7 +40,7 @@
         <div class="container" style="max-width: 900px; margin: 0 auto;">
             <div class="lead-form" style="padding: 0; background: rgba(0, 0, 0, 0.03); overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-radius: 12px;">
                 <!-- LeadConnector Booking Widget begin -->
-                <iframe src="https://api.leadconnectorhq.com/widget/bookings/strategy-call-john-atkins" style="border: 0; width: 100%; min-height: 900px; display: block;" frameborder="0"></iframe>
+                <iframe src="https://api.leadconnectorhq.com/widget/bookings/strategy-call-john-atkins" class="booking-iframe" frameborder="0"></iframe>
                 <!-- end LeadConnector Booking Widget -->
             </div>
         </div>
