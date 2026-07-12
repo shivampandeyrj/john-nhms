@@ -11,8 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
         iti = window.intlTelInput(phoneInput, {
             utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.0/build/js/utils.js",
             initialCountry: "gb", // Default to UK
-            countrySearch: true, // Enables the search bar in the dropdown
-            preferredCountries: ["gb", "us", "ie", "fr", "de", "es", "it", "nl", "ch", "se", "no"], // UK, US, and top EU countries at the top
+            countryOrder: ["gb", "us", "ie", "fr", "de", "es", "it", "nl", "ch", "se", "no"], // UK, US, and top EU countries at the top
         });
     }
 
