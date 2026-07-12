@@ -9,8 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let iti;
     if (phoneInput) {
         iti = window.intlTelInput(phoneInput, {
-            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.19/js/utils.js",
+            utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.0/build/js/utils.js",
             initialCountry: "auto",
+            countrySearch: true, // Enables the search bar in the dropdown
             geoIpLookup: function(success, failure) {
                 fetch("https://ipapi.co/json")
                   .then(function(res) { return res.json(); })
