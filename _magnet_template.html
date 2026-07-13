@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The 10K Roadmap | NHMS</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.0/build/css/intlTelInput.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <meta name="description" content="Download the exact 10K Roadmap to shift your mindset and build new habits for high performance.">
+</head>
+<body>
+    <div class="accent-cut" style="top: -50px; left: -50px; width: 200px; height: 500px;"></div>
+    
+    <nav style="padding: 0; text-align: center; border-bottom: 1px solid var(--color-border); margin-bottom: 1rem;">
+        <div class="container" style="display: flex; justify-content: center;">
+            <a href="/" style="display: inline-block;">
+                <img src="assets/logo.png" alt="NHMS Logo" style="height: 65px; width: auto; max-width: 100%; display: block;">
+            </a>
+        </div>
+    </nav>
+
+    <section class="hero" style="padding-top: 1rem; padding-bottom: 2rem; min-height: calc(100vh - 120px); display: flex; align-items: center;">
+        <div class="container grid grid-2" style="align-items: center; gap: 4rem;">
+            <div>
+                <p id="dyn-header" style="text-transform: uppercase; letter-spacing: 2px; color: var(--color-teal); font-weight: 700; margin-bottom: 1rem; font-size: 0.9rem;">FREE RESOURCE</p>
+                <h1 id="dyn-title" style="font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -0.02em;">Scale to 10K with the Roadmap</h1>
+                <p id="dyn-info" style="font-size: 1.15rem; line-height: 1.6; margin-bottom: 2rem; color: var(--color-text-secondary);">The exact framework used by top performers to rewire their mindset, build non-negotiable habits, and scale their business effortlessly.</p>
+                
+                <ul id="dyn-bullets" class="benefits-list" style="margin-bottom: 2.5rem;">
+                    <li style="margin-bottom: 1rem;">The 3 mindset shifts required to break the 10K/mo barrier</li>
+                    <li style="margin-bottom: 1rem;">Daily habits of high-performing entrepreneurs</li>
+                    <li style="margin-bottom: 1rem;">How to eliminate procrastination and execute relentlessly</li>
+                </ul>
+
+                <div class="social-proof" style="padding: 0; background: transparent; border: none; display: flex; align-items: center; gap: 1rem;">
+                    <img id="dyn-photo" src="assets/john-atkins.jpeg" alt="John Atkins" style="width: 140px; height: 140px; object-fit: cover; border-radius: 50%; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 4px solid var(--color-bg);">
+                    <div style="font-size: 0.9rem; color: var(--color-text-secondary); line-height: 1.5;">
+                        <strong style="color: var(--color-text-primary); font-size: 1.1rem; display: block; margin-bottom: 0.2rem;">John Atkins</strong>
+                        Certified Consultant <br>Bob Proctor & Sandy Gallagher
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <form class="lead-form" id="leadForm">
+                    <h3 style="margin-bottom: 2rem;">Get Instant Access</h3>
+                    <input type="hidden" id="dyn-slug" name="magnetType" value="10k-roadmap">
+                    
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="name" placeholder="First Name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <input type="email" class="form-control" name="email" placeholder="Email Address" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <input type="tel" class="form-control" name="phone" placeholder="Phone Number" required>
+                    </div>
+
+                    <div style="display: flex; align-items: flex-start; gap: 0.5rem; margin-top: 1.5rem; margin-bottom: 1rem;">
+                        <input type="checkbox" id="consent" required style="margin-top: 0.25rem;">
+                        <label for="consent" style="font-size: 0.85rem; color: var(--color-text-secondary); line-height: 1.4;">
+                            I consent to receiving communications from NHMS via email. (You may opt out of communications at any time.)
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn" style="width: 100%; margin-top: 1rem;" id="submitBtn">
+                        <span id="dyn-btn">Send Me the Roadmap</span>
+                        <div class="loader" id="submitLoader"></div>
+                    </button>
+                    
+                    <div class="trust-strip">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        Your data is secure. No spam. Unsubscribe anytime.
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.0/build/js/intlTelInput.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
