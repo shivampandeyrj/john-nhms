@@ -5,4 +5,4 @@ compatibility_date = "2024-03-20"
 [[d1_databases]]
 binding = "DB"
 database_name = "nhms-leads-db"
-database_id = "pending-id"
+database_id = "81f3dd74-312a-4497-8f20-bcaab83f9135"
