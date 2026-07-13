@@ -99,34 +99,47 @@
         <main class="main-content">
             <h2 style="margin-bottom: 2rem;">Manage Lead Magnets</h2>
             
-            <div class="config-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <h3>10K Roadmap</h3>
-                    <label class="toggle-switch">
-                        <input type="checkbox" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="form-group">
-                    <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Google Drive PDF Link</label>
-                    <input type="text" class="form-control" value="https://drive.google.com/file/d/example/view">
-                </div>
-                <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Save Changes</button>
+            <div id="magnetsList">
+                <!-- Magnets will be rendered here dynamically -->
             </div>
 
-            <div class="config-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <h3>Morning Routine</h3>
-                    <label class="toggle-switch">
-                        <input type="checkbox" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="form-group">
-                    <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Google Drive PDF Link</label>
-                    <input type="text" class="form-control" value="https://drive.google.com/file/d/example2/view">
-                </div>
-                <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Save Changes</button>
+            <div class="config-card" style="margin-top: 3rem; border-color: var(--color-teal);">
+                <h3 style="margin-bottom: 1.5rem; color: var(--color-teal);">Add New Lead Magnet</h3>
+                <form id="addMagnetForm">
+                    <div class="form-group">
+                        <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">URL Slug (e.g., 10k-roadmap)</label>
+                        <input type="text" id="magSlug" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Header / Pre-Title (e.g., FREE RESOURCES)</label>
+                        <input type="text" id="magHeader" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Title / Headline</label>
+                        <input type="text" id="magTitle" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Information / Subtitle</label>
+                        <textarea id="magInfo" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Bullet Points (One per line)</label>
+                        <textarea id="magBullets" class="form-control" rows="4"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Profile Photo URL (Optional)</label>
+                        <input type="text" id="magPhoto" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Button Text</label>
+                        <input type="text" id="magBtnText" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Mail Content (Use *text* for blue styling)</label>
+                        <textarea id="magMail" class="form-control" rows="6" required></textarea>
+                    </div>
+                    <button type="submit" id="saveMagnetBtn" class="btn btn-primary" style="padding: 0.5rem 1.5rem; font-size: 1rem;">Create Lead Magnet</button>
+                </form>
             </div>
             
             <h2 style="margin-bottom: 2rem; margin-top: 4rem;">Global Links</h2>
@@ -145,8 +158,11 @@
         document.addEventListener('DOMContentLoaded', async () => {
             const bookingUrlInput = document.getElementById('bookingUrlInput');
             const saveBtn = document.getElementById('saveBookingUrlBtn');
+            const magnetsList = document.getElementById('magnetsList');
+            const addMagnetForm = document.getElementById('addMagnetForm');
+            const saveMagnetBtn = document.getElementById('saveMagnetBtn');
             
-            // Load current config
+            // --- Global Config Logic ---
             try {
                 const res = await fetch('/api/config?key=booking_url');
                 if (res.ok) {
@@ -157,7 +173,6 @@
                 console.error("Failed to load booking_url config", err);
             }
             
-            // Save config
             saveBtn.addEventListener('click', async () => {
                 const originalText = saveBtn.textContent;
                 saveBtn.textContent = 'Saving...';
@@ -183,6 +198,97 @@
                     saveBtn.disabled = false;
                 }
             });
+
+            // --- Lead Magnet CRUD Logic ---
+            async function loadMagnets() {
+                magnetsList.innerHTML = '<p>Loading magnets...</p>';
+                try {
+                    const res = await fetch('/api/magnets');
+                    if (res.ok) {
+                        const magnets = await res.json();
+                        magnetsList.innerHTML = '';
+                        if (magnets.length === 0) {
+                            magnetsList.innerHTML = '<p style="color: var(--color-text-secondary);">No lead magnets found. Create one below.</p>';
+                            return;
+                        }
+                        
+                        magnets.forEach(mag => {
+                            const card = document.createElement('div');
+                            card.className = 'config-card';
+                            card.innerHTML = `
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                    <h3>${mag.title || mag.slug}</h3>
+                                    <button class="btn btn-outline" style="border-color: #ff4d4d; color: #ff4d4d;" onclick="deleteMagnet(${mag.id})">Delete</button>
+                                </div>
+                                <p style="color: var(--color-text-secondary); margin-bottom: 0;">Slug: /${mag.slug}</p>
+                            `;
+                            magnetsList.appendChild(card);
+                        });
+                    }
+                } catch (err) {
+                    console.error("Failed to load magnets", err);
+                    magnetsList.innerHTML = '<p style="color: #ff4d4d;">Failed to load magnets.</p>';
+                }
+            }
+
+            window.deleteMagnet = async function(id) {
+                if (!confirm('Are you sure you want to delete this lead magnet?')) return;
+                
+                try {
+                    const res = await fetch('/api/magnets/' + id, { method: 'DELETE' });
+                    if (res.ok) {
+                        loadMagnets();
+                    } else {
+                        alert('Failed to delete.');
+                    }
+                } catch (err) {
+                    console.error("Failed to delete magnet", err);
+                    alert('Network error.');
+                }
+            };
+
+            addMagnetForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const originalText = saveMagnetBtn.textContent;
+                saveMagnetBtn.textContent = 'Saving...';
+                saveMagnetBtn.disabled = true;
+
+                const payload = {
+                    slug: document.getElementById('magSlug').value,
+                    header: document.getElementById('magHeader').value,
+                    title: document.getElementById('magTitle').value,
+                    info: document.getElementById('magInfo').value,
+                    bullet_points: document.getElementById('magBullets').value,
+                    profile_photo: document.getElementById('magPhoto').value,
+                    button_text: document.getElementById('magBtnText').value,
+                    mail_content: document.getElementById('magMail').value
+                };
+
+                try {
+                    const res = await fetch('/api/magnets', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (res.ok) {
+                        addMagnetForm.reset();
+                        loadMagnets();
+                    } else {
+                        const err = await res.json();
+                        alert('Failed to create lead magnet: ' + (err.error || 'Unknown error'));
+                    }
+                } catch (err) {
+                    console.error("Failed to create magnet", err);
+                    alert('Network error.');
+                } finally {
+                    saveMagnetBtn.textContent = originalText;
+                    saveMagnetBtn.disabled = false;
+                }
+            });
+
+            // Initial load
+            loadMagnets();
         });
     </script>
         </main>
