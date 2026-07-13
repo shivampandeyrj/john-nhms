@@ -133,15 +133,58 @@
             
             <div class="config-card">
                 <div class="form-group">
-                    <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Google Calendar Embed Source URL (for /call)</label>
-                    <input type="text" class="form-control" value="https://calendar.google.com/calendar/appointments/schedules/AcZssZ...">
+                    <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Booking Widget Source URL (for /call)</label>
+                    <input type="text" id="bookingUrlInput" class="form-control" value="https://api.leadconnectorhq.com/widget/bookings/strategy-call-john-atkins">
                 </div>
-                <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Save Calendar Link</button>
+                <button id="saveBookingUrlBtn" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Save Booking Link</button>
             </div>
+        </main>
+    </div>
 
-            <p style="color: var(--color-text-secondary); font-size: 0.9rem; margin-top: 2rem;">
-                Note: This dashboard requires connection to Google Apps Script `doGet()` and `doPost()` to save configurations to the Google Sheet Config tab dynamically.
-            </p>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const bookingUrlInput = document.getElementById('bookingUrlInput');
+            const saveBtn = document.getElementById('saveBookingUrlBtn');
+            
+            // Load current config
+            try {
+                const res = await fetch('/api/config?key=booking_url');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.value) bookingUrlInput.value = data.value;
+                }
+            } catch (err) {
+                console.error("Failed to load booking_url config", err);
+            }
+            
+            // Save config
+            saveBtn.addEventListener('click', async () => {
+                const originalText = saveBtn.textContent;
+                saveBtn.textContent = 'Saving...';
+                saveBtn.disabled = true;
+                
+                try {
+                    const res = await fetch('/api/config', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ key: 'booking_url', value: bookingUrlInput.value })
+                    });
+                    
+                    if (res.ok) {
+                        alert('Configuration saved successfully!');
+                    } else {
+                        alert('Failed to save configuration.');
+                    }
+                } catch (err) {
+                    console.error("Failed to save booking_url config", err);
+                    alert('Network error.');
+                } finally {
+                    saveBtn.textContent = originalText;
+                    saveBtn.disabled = false;
+                }
+            });
+        });
+    </script>
         </main>
     </div>
 </body>

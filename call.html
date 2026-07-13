@@ -39,11 +39,33 @@
     <section style="padding-top: 0;">
         <div class="container" style="max-width: 900px; margin: 0 auto;">
             <div class="lead-form" style="padding: 0; background: rgba(0, 0, 0, 0.03); overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-radius: 12px;">
-                <!-- LeadConnector Booking Widget begin -->
-                <iframe src="https://api.leadconnectorhq.com/widget/bookings/strategy-call-john-atkins" class="booking-iframe" frameborder="0"></iframe>
-                <!-- end LeadConnector Booking Widget -->
+                <!-- Booking Widget iframe -->
+                <iframe id="bookingIframe" class="booking-iframe" frameborder="0"></iframe>
             </div>
         </div>
     </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const iframe = document.getElementById('bookingIframe');
+            const fallbackUrl = 'https://api.leadconnectorhq.com/widget/bookings/strategy-call-john-atkins';
+            
+            try {
+                const res = await fetch('/api/config?key=booking_url');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.value) {
+                        iframe.src = data.value;
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch booking_url config", err);
+            }
+            
+            // Use fallback if fetch failed or returned empty
+            iframe.src = fallbackUrl;
+        });
+    </script>
 </body>
 </html>
