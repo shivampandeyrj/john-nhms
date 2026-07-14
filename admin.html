@@ -549,18 +549,20 @@
                     const appScriptUrl = document.getElementById('appScriptUrl').value;
 
                     if (pdfFile) {
-                        if (!appScriptUrl) throw new Error("Missing Apps Script URL");
                         const base64Data = await getBase64(pdfFile);
                         
-                        const formData = new URLSearchParams();
-                        formData.append('action', 'upload');
-                        formData.append('fileName', document.getElementById('magSlug').value + '.pdf');
-                        formData.append('fileData', base64Data);
-
-                        const uploadRes = await fetch(appScriptUrl, { method: 'POST', body: formData });
+                        const uploadRes = await fetch('/api/upload', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                fileName: document.getElementById('magSlug').value + '.pdf',
+                                fileData: base64Data
+                            })
+                        });
+                        
                         const uploadData = await uploadRes.json();
                         if (uploadData.status === 'success') finalPdfUrl = uploadData.url;
-                        else throw new Error('Upload Failed');
+                        else throw new Error('Upload Failed: ' + uploadData.message);
                     }
 
                     const payload = {
@@ -617,17 +619,13 @@
 
             const sendOtpBtn = document.getElementById('sendOtpBtn');
             sendOtpBtn.addEventListener('click', async () => {
-                const url = document.getElementById('appScriptUrl').value;
-                if(!url) return alert("Please enter Apps Script URL in the Lead Magnets tab first.");
-                
                 sendOtpBtn.textContent = 'Sending...';
                 sendOtpBtn.disabled = true;
                 
                 try {
                     const res = await fetch('/api/auth/otp', {
                         method: 'POST',
-                        headers: {'Content-Type':'application/json'},
-                        body: JSON.stringify({ appsScriptUrl: url })
+                        headers: {'Content-Type':'application/json'}
                     });
                     if (res.ok) {
                         alert("OTP sent to John's email!");

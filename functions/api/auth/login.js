@@ -14,8 +14,14 @@ export async function onRequestPost({ request, env }) {
         const stmt = env.DB.prepare('SELECT password_hash FROM admin WHERE username = ?').bind(username);
         const user = await stmt.first();
 
-        // Direct match for MVP (Assume DB holds raw string for now before hashing is implemented on creation)
-        if (user && user.password_hash === password) {
+        // Hash the provided password using Web Crypto API
+        const encoder = new TextEncoder();
+        const data = encoder.encode(password);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashedPassword = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+        if (user && user.password_hash === hashedPassword) {
             // Set secure cookie valid for 24 hours
             return new Response(JSON.stringify({ success: true }), {
                 status: 200,

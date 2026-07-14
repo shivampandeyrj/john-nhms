@@ -9,6 +9,17 @@ export async function onRequestGet({ request, env }) {
         });
     }
 
+    const allowedPublicKeys = ['booking_url', 'webinar_link'];
+    const cookieHeader = request.headers.get('Cookie');
+    const isAdmin = cookieHeader && cookieHeader.includes('admin_session=true');
+
+    if (!allowedPublicKeys.includes(key) && !isAdmin) {
+        return new Response(JSON.stringify({ error: "Unauthorized access to this config key" }), { 
+            status: 403,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
+
     try {
         const stmt = env.DB.prepare('SELECT value FROM config WHERE key = ?').bind(key);
         const result = await stmt.first();

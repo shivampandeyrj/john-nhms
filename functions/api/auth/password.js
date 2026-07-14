@@ -23,8 +23,15 @@ export async function onRequestPost({ request, env }) {
         // Delete used OTP
         await env.DB.prepare('DELETE FROM otp_codes WHERE id = ?').bind(validOtp.id).run();
 
+        // Hash the new password using Web Crypto API
+        const encoder = new TextEncoder();
+        const data = encoder.encode(newPassword);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashedPassword = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
         // Update admin password (MVP: username 'admin')
-        const updateStmt = env.DB.prepare('UPDATE admin SET password_hash = ? WHERE username = "admin"').bind(newPassword);
+        const updateStmt = env.DB.prepare('UPDATE admin SET password_hash = ? WHERE username = "admin"').bind(hashedPassword);
         await updateStmt.run();
 
         return new Response(JSON.stringify({ success: true }), {

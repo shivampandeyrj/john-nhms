@@ -1,5 +1,4 @@
-// IMPORTANT: Replace this with the deployed Apps Script Web App URL
-const APPS_SCRIPT_URL = '{{APPS_SCRIPT_URL}}';
+// Main JS for form handling
 
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('leadForm');
@@ -37,19 +36,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                // Post data to Apps Script Web App
-                const response = await fetch(APPS_SCRIPT_URL, {
+                // Post data to Cloudflare backend securely
+                const response = await fetch('/api/submit', {
                     method: 'POST',
-                    mode: 'no-cors', // Use no-cors for simple submission if CORS isn't fully configured
-                    cache: 'no-cache',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    redirect: 'follow',
                     body: JSON.stringify(data)
                 });
 
-                // Assuming success due to no-cors limitations
+                if (!response.ok) {
+                    throw new Error("Server rejected submission");
+                }
                 window.location.href = '/thank-you';
 
             } catch (error) {

@@ -1,4 +1,9 @@
-export async function onRequestGet({ env }) {
+export async function onRequestGet({ request, env }) {
+    const cookieHeader = request.headers.get('Cookie');
+    if (!cookieHeader || !cookieHeader.includes('admin_session=true')) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+    }
+
     try {
         const stmt = env.DB.prepare('SELECT * FROM lead_magnets ORDER BY id DESC');
         const results = await stmt.all();

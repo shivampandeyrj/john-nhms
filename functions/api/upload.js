@@ -5,6 +5,13 @@ export async function onRequestPost({ request, env }) {
     }
 
     try {
+        const body = await request.json();
+        const { fileName, fileData } = body;
+
+        if (!fileName || !fileData) {
+            return new Response(JSON.stringify({ error: "Missing file details" }), { status: 400 });
+        }
+
         // Fetch Apps Script Configuration
         const urlStmt = env.DB.prepare('SELECT value FROM config WHERE key = "apps_script_url"');
         const secretStmt = env.DB.prepare('SELECT value FROM config WHERE key = "apps_script_secret"');
@@ -16,21 +23,13 @@ export async function onRequestPost({ request, env }) {
             return new Response(JSON.stringify({ error: "Apps Script URL not configured" }), { status: 500 });
         }
 
-        // Generate 6-digit OTP
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
-
-        // Insert into DB
-        const stmt = env.DB.prepare('INSERT INTO otp_codes (code, expires_at) VALUES (?, ?)').bind(otp, expiresAt);
-        await stmt.run();
-
-        // Call Apps Script to send email
         const formData = new URLSearchParams();
-        formData.append('action', 'sendOtp');
+        formData.append('action', 'upload');
         formData.append('secret', secretRow ? secretRow.value : '');
-        formData.append('otp', otp);
+        formData.append('fileName', fileName);
+        formData.append('fileData', fileData);
 
-        const emailRes = await fetch(urlRow.value, {
+        const uploadRes = await fetch(urlRow.value, {
             method: 'POST',
             body: formData,
             headers: {
@@ -38,14 +37,13 @@ export async function onRequestPost({ request, env }) {
             }
         });
 
-        return new Response(JSON.stringify({ success: true, message: "OTP sent successfully" }), {
+        const uploadData = await uploadRes.json();
+        return new Response(JSON.stringify(uploadData), {
             status: 200,
             headers: { 'Content-Type': 'application/json' }
         });
+
     } catch (e) {
-        return new Response(JSON.stringify({ error: "Server Error", details: e.message }), { 
-            status: 500,
-            headers: { 'Content-Type': 'application/json' }
-        });
+        return new Response(JSON.stringify({ error: "Server Error", details: e.message }), { status: 500 });
     }
 }

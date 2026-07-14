@@ -67,7 +67,12 @@ async function onRequestPost({ request, env }) {
     }
     const stmt = env.DB.prepare("SELECT password_hash FROM admin WHERE username = ?").bind(username);
     const user = await stmt.first();
-    if (user && user.password_hash === password) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashedPassword = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+    if (user && user.password_hash === hashedPassword) {
       return new Response(JSON.stringify({ success: true }), {
         status: 200,
         headers: {
@@ -107,10 +112,12 @@ async function onRequestPost3({ request, env }) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
   }
   try {
-    const body = await request.json();
-    const { appsScriptUrl } = body;
-    if (!appsScriptUrl) {
-      return new Response(JSON.stringify({ error: "Apps Script URL is required to send the OTP" }), { status: 400 });
+    const urlStmt = env.DB.prepare('SELECT value FROM config WHERE key = "apps_script_url"');
+    const secretStmt = env.DB.prepare('SELECT value FROM config WHERE key = "apps_script_secret"');
+    const urlRow = await urlStmt.first();
+    const secretRow = await secretStmt.first();
+    if (!urlRow || !urlRow.value) {
+      return new Response(JSON.stringify({ error: "Apps Script URL not configured" }), { status: 500 });
     }
     const otp = Math.floor(1e5 + Math.random() * 9e5).toString();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1e3).toISOString();
@@ -118,8 +125,9 @@ async function onRequestPost3({ request, env }) {
     await stmt.run();
     const formData = new URLSearchParams();
     formData.append("action", "sendOtp");
+    formData.append("secret", secretRow ? secretRow.value : "");
     formData.append("otp", otp);
-    const emailRes = await fetch(appsScriptUrl, {
+    const emailRes = await fetch(urlRow.value, {
       method: "POST",
       body: formData,
       headers: {
@@ -156,7 +164,12 @@ async function onRequestPost4({ request, env }) {
       return new Response(JSON.stringify({ error: "Invalid or expired OTP" }), { status: 400 });
     }
     await env.DB.prepare("DELETE FROM otp_codes WHERE id = ?").bind(validOtp.id).run();
-    const updateStmt = env.DB.prepare('UPDATE admin SET password_hash = ? WHERE username = "admin"').bind(newPassword);
+    const encoder = new TextEncoder();
+    const data = encoder.encode(newPassword);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashedPassword = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+    const updateStmt = env.DB.prepare('UPDATE admin SET password_hash = ? WHERE username = "admin"').bind(hashedPassword);
     await updateStmt.run();
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
@@ -231,6 +244,15 @@ async function onRequestGet({ request, env }) {
   if (!key) {
     return new Response(JSON.stringify({ error: "Missing key parameter" }), {
       status: 400,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+  const allowedPublicKeys = ["booking_url", "webinar_link"];
+  const cookieHeader = request.headers.get("Cookie");
+  const isAdmin = cookieHeader && cookieHeader.includes("admin_session=true");
+  if (!allowedPublicKeys.includes(key) && !isAdmin) {
+    return new Response(JSON.stringify({ error: "Unauthorized access to this config key" }), {
+      status: 403,
       headers: { "Content-Type": "application/json" }
     });
   }
@@ -338,7 +360,11 @@ async function onRequestPost6({ request, env }) {
 }
 __name(onRequestPost6, "onRequestPost6");
 __name2(onRequestPost6, "onRequestPost");
-async function onRequestGet3({ env }) {
+async function onRequestGet3({ request, env }) {
+  const cookieHeader = request.headers.get("Cookie");
+  if (!cookieHeader || !cookieHeader.includes("admin_session=true")) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+  }
   try {
     const stmt = env.DB.prepare("SELECT * FROM lead_magnets ORDER BY id DESC");
     const results = await stmt.all();
@@ -384,6 +410,129 @@ async function onRequestPost7({ request, env }) {
 }
 __name(onRequestPost7, "onRequestPost7");
 __name2(onRequestPost7, "onRequestPost");
+async function onRequestPost8({ request, env }) {
+  try {
+    const body = await request.json();
+    const { name, email, phone, magnetType } = body;
+    if (!name || !email || !magnetType) {
+      return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400 });
+    }
+    const stmt = env.DB.prepare(`
+            INSERT INTO leads (name, email, phone, magnet_type)
+            VALUES (?, ?, ?, ?)
+        `).bind(name, email, phone || null, magnetType);
+    await stmt.run();
+    const magnetStmt = env.DB.prepare("SELECT * FROM lead_magnets WHERE slug = ?").bind(magnetType);
+    const magnet = await magnetStmt.first();
+    if (!magnet) {
+      return new Response(JSON.stringify({ error: "Magnet not found" }), { status: 404 });
+    }
+    let rawMail = magnet.mail_content || `Hi ${name},
+
+Here is your resource!`;
+    let htmlMail = rawMail.replace(/\*(.*?)\*/g, '<span style="color: #0d9488; font-weight: 600;">$1</span>').replace(/\n/g, "<br>").replace(/\{name\}/g, name);
+    let downloadButton = "";
+    if (magnet.pdf_url) {
+      downloadButton = `
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="${magnet.pdf_url}" style="background-color: #0d9488; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px; display: inline-block;">Download Your PDF</a>
+                </div>
+            `;
+    }
+    const fullHtmlEmail = `
+            <!DOCTYPE html>
+            <html>
+            <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1f2937; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <div style="text-align: center; margin-bottom: 30px; border-bottom: 1px solid #e5e7eb; padding-bottom: 20px;">
+                <img src="https://cdn.pixabay.com/photo/2017/02/18/19/20/logo-2078018_1280.png" alt="NHMS Logo" style="height: 50px;">
+                </div>
+                <div style="font-size: 16px;">
+                ${htmlMail}
+                ${downloadButton}
+                </div>
+                <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 14px; color: #6b7280;">
+                <p>You received this email because you requested a resource from NHMS.</p>
+                <p>&copy; ${(/* @__PURE__ */ new Date()).getFullYear()} NHMS. All rights reserved.</p>
+                </div>
+            </body>
+            </html>
+        `;
+    const plainTextMail = rawMail.replace(/\*(.*?)\*/g, "$1") + (magnet.pdf_url ? `
+
+Download link: ${magnet.pdf_url}` : "");
+    const subject = `Your resource is here: ${magnet.title || magnet.header || magnetType}`;
+    const urlStmt = env.DB.prepare('SELECT value FROM config WHERE key = "apps_script_url"');
+    const secretStmt = env.DB.prepare('SELECT value FROM config WHERE key = "apps_script_secret"');
+    const urlRow = await urlStmt.first();
+    const secretRow = await secretStmt.first();
+    if (urlRow && urlRow.value) {
+      const formData = new URLSearchParams();
+      formData.append("action", "sendLeadEmail");
+      formData.append("secret", secretRow ? secretRow.value : "");
+      formData.append("email", email);
+      formData.append("name", name);
+      formData.append("phone", phone || "");
+      formData.append("magnetType", magnetType);
+      formData.append("subject", subject);
+      formData.append("plainText", plainTextMail);
+      formData.append("htmlBody", fullHtmlEmail);
+      await fetch(urlRow.value, {
+        method: "POST",
+        body: formData,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+      });
+    }
+    return new Response(JSON.stringify({ status: "success" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: "Server Error", details: e.message }), { status: 500 });
+  }
+}
+__name(onRequestPost8, "onRequestPost8");
+__name2(onRequestPost8, "onRequestPost");
+async function onRequestPost9({ request, env }) {
+  const cookieHeader = request.headers.get("Cookie");
+  if (!cookieHeader || !cookieHeader.includes("admin_session=true")) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+  }
+  try {
+    const body = await request.json();
+    const { fileName, fileData } = body;
+    if (!fileName || !fileData) {
+      return new Response(JSON.stringify({ error: "Missing file details" }), { status: 400 });
+    }
+    const urlStmt = env.DB.prepare('SELECT value FROM config WHERE key = "apps_script_url"');
+    const secretStmt = env.DB.prepare('SELECT value FROM config WHERE key = "apps_script_secret"');
+    const urlRow = await urlStmt.first();
+    const secretRow = await secretStmt.first();
+    if (!urlRow || !urlRow.value) {
+      return new Response(JSON.stringify({ error: "Apps Script URL not configured" }), { status: 500 });
+    }
+    const formData = new URLSearchParams();
+    formData.append("action", "upload");
+    formData.append("secret", secretRow ? secretRow.value : "");
+    formData.append("fileName", fileName);
+    formData.append("fileData", fileData);
+    const uploadRes = await fetch(urlRow.value, {
+      method: "POST",
+      body: formData,
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      }
+    });
+    const uploadData = await uploadRes.json();
+    return new Response(JSON.stringify(uploadData), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: "Server Error", details: e.message }), { status: 500 });
+  }
+}
+__name(onRequestPost9, "onRequestPost9");
+__name2(onRequestPost9, "onRequestPost");
 async function onRequest(context) {
   const { request, next } = context;
   const cookieHeader = request.headers.get("Cookie");
@@ -541,6 +690,20 @@ var routes = [
     method: "POST",
     middlewares: [],
     modules: [onRequestPost7]
+  },
+  {
+    routePath: "/api/submit",
+    mountPath: "/api",
+    method: "POST",
+    middlewares: [],
+    modules: [onRequestPost8]
+  },
+  {
+    routePath: "/api/upload",
+    mountPath: "/api",
+    method: "POST",
+    middlewares: [],
+    modules: [onRequestPost9]
   },
   {
     routePath: "/admin",
