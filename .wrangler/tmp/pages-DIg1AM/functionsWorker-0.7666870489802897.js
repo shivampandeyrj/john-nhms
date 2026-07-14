@@ -1,32 +1,6 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
-// ../.wrangler/tmp/bundle-VrcPgf/checked-fetch.js
-var urls = /* @__PURE__ */ new Set();
-function checkURL(request, init) {
-  const url = request instanceof URL ? request : new URL(
-    (typeof request === "string" ? new Request(request, init) : request).url
-  );
-  if (url.port && url.port !== "443" && url.protocol === "https:") {
-    if (!urls.has(url.toString())) {
-      urls.add(url.toString());
-      console.warn(
-        `WARNING: known issue with \`fetch()\` requests to custom HTTPS ports in published Workers:
- - ${url.toString()} - the custom port will be ignored when the Worker is published using the \`wrangler deploy\` command.
-`
-      );
-    }
-  }
-}
-__name(checkURL, "checkURL");
-globalThis.fetch = new Proxy(globalThis.fetch, {
-  apply(target, thisArg, argArray) {
-    const [request, init] = argArray;
-    checkURL(request, init);
-    return Reflect.apply(target, thisArg, argArray);
-  }
-});
-
 // api/auth/login.js
 async function onRequestPost({ request, env }) {
   try {
@@ -197,12 +171,12 @@ async function onRequestPut({ request, env, params }) {
     const id = params.id;
     if (!id) return new Response(JSON.stringify({ error: "Missing ID parameter" }), { status: 400 });
     const body = await request.json();
-    const { slug, header, info, bullet_points, profile_photo, title, button_text, email_button_text, mail_content, pdf_url } = body;
+    const { slug, header, info, bullet_points, profile_photo, title, button_text, mail_content, pdf_url } = body;
     const stmt = env.DB.prepare(`
             UPDATE lead_magnets 
-            SET slug = ?, header = ?, info = ?, bullet_points = ?, profile_photo = ?, title = ?, button_text = ?, email_button_text = ?, mail_content = ?, pdf_url = ?
+            SET slug = ?, header = ?, info = ?, bullet_points = ?, profile_photo = ?, title = ?, button_text = ?, mail_content = ?, pdf_url = ?
             WHERE id = ?
-        `).bind(slug, header, info, bullet_points, profile_photo, title, button_text, email_button_text, mail_content, pdf_url || null, id);
+        `).bind(slug, header, info, bullet_points, profile_photo, title, button_text, mail_content, pdf_url || null, id);
     await stmt.run();
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
@@ -384,14 +358,14 @@ async function onRequestPost6({ request, env }) {
   }
   try {
     const body = await request.json();
-    const { slug, header, info, bullet_points, profile_photo, title, button_text, email_button_text, mail_content, pdf_url } = body;
+    const { slug, header, info, bullet_points, profile_photo, title, button_text, mail_content, pdf_url } = body;
     if (!slug || !header) {
       return new Response(JSON.stringify({ error: "Slug and header are required" }), { status: 400 });
     }
     const stmt = env.DB.prepare(`
-            INSERT INTO lead_magnets (slug, header, info, bullet_points, profile_photo, title, button_text, email_button_text, mail_content, pdf_url)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).bind(slug, header, info, bullet_points, profile_photo, title, button_text, email_button_text, mail_content, pdf_url || null);
+            INSERT INTO lead_magnets (slug, header, info, bullet_points, profile_photo, title, button_text, mail_content, pdf_url)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(slug, header, info, bullet_points, profile_photo, title, button_text, mail_content, pdf_url || null);
     const result = await stmt.run();
     return new Response(JSON.stringify({ success: true, id: result.meta.last_row_id }), {
       status: 200,
@@ -430,10 +404,9 @@ Here is your resource!`;
     let htmlMail = rawMail.replace(/\*(.*?)\*/g, '<span style="color: #0d9488; font-weight: 600;">$1</span>').replace(/\n/g, "<br>").replace(/\{name\}/g, name);
     let downloadButton = "";
     if (magnet.pdf_url) {
-      const btnText = (magnet.email_button_text || "Download Your PDF").replace(/\*/g, "");
       downloadButton = `
                 <div style="text-align: center; margin: 30px 0;">
-                    <a href="${magnet.pdf_url}" style="background-color: #0d9488; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px; display: inline-block;">${btnText}</a>
+                    <a href="${magnet.pdf_url}" style="background-color: #0d9488; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px; display: inline-block;">Download Your PDF</a>
                 </div>
             `;
     }
@@ -617,7 +590,7 @@ async function onRequestGet4({ request, env, next, params, waitUntil }) {
 }
 __name(onRequestGet4, "onRequestGet");
 
-// ../.wrangler/tmp/pages-btdjLm/functionsRoutes-0.4844455604270139.mjs
+// ../.wrangler/tmp/pages-DIg1AM/functionsRoutes-0.44000463888989527.mjs
 var routes = [
   {
     routePath: "/api/auth/login",
@@ -1178,180 +1151,6 @@ var cloneResponse = /* @__PURE__ */ __name((response) => (
     response
   )
 ), "cloneResponse");
-
-// ../../../.npm/_npx/32026684e21afda6/node_modules/wrangler/templates/middleware/middleware-ensure-req-body-drained.ts
-var drainBody = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx) => {
-  try {
-    return await middlewareCtx.next(request, env);
-  } finally {
-    try {
-      if (request.body !== null && !request.bodyUsed) {
-        const reader = request.body.getReader();
-        while (!(await reader.read()).done) {
-        }
-      }
-    } catch (e) {
-      console.error("Failed to drain the unused request body.", e);
-    }
-  }
-}, "drainBody");
-var middleware_ensure_req_body_drained_default = drainBody;
-
-// ../../../.npm/_npx/32026684e21afda6/node_modules/wrangler/templates/middleware/middleware-miniflare3-json-error.ts
-function reduceError(e) {
-  return {
-    name: e?.name,
-    message: e?.message ?? String(e),
-    stack: e?.stack,
-    cause: e?.cause === void 0 ? void 0 : reduceError(e.cause)
-  };
-}
-__name(reduceError, "reduceError");
-var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx) => {
-  try {
-    return await middlewareCtx.next(request, env);
-  } catch (e) {
-    const error = reduceError(e);
-    return Response.json(error, {
-      status: 500,
-      headers: { "MF-Experimental-Error-Stack": "true" }
-    });
-  }
-}, "jsonError");
-var middleware_miniflare3_json_error_default = jsonError;
-
-// ../.wrangler/tmp/bundle-VrcPgf/middleware-insertion-facade.js
-var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
-  middleware_ensure_req_body_drained_default,
-  middleware_miniflare3_json_error_default
-];
-var middleware_insertion_facade_default = pages_template_worker_default;
-
-// ../../../.npm/_npx/32026684e21afda6/node_modules/wrangler/templates/middleware/common.ts
-var __facade_middleware__ = [];
-function __facade_register__(...args) {
-  __facade_middleware__.push(...args.flat());
-}
-__name(__facade_register__, "__facade_register__");
-function __facade_invokeChain__(request, env, ctx, dispatch, middlewareChain) {
-  const [head, ...tail] = middlewareChain;
-  const middlewareCtx = {
-    dispatch,
-    next(newRequest, newEnv) {
-      return __facade_invokeChain__(newRequest, newEnv, ctx, dispatch, tail);
-    }
-  };
-  return head(request, env, ctx, middlewareCtx);
-}
-__name(__facade_invokeChain__, "__facade_invokeChain__");
-function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
-  return __facade_invokeChain__(request, env, ctx, dispatch, [
-    ...__facade_middleware__,
-    finalMiddleware
-  ]);
-}
-__name(__facade_invoke__, "__facade_invoke__");
-
-// ../.wrangler/tmp/bundle-VrcPgf/middleware-loader.entry.ts
-var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
-  constructor(scheduledTime, cron, noRetry) {
-    this.scheduledTime = scheduledTime;
-    this.cron = cron;
-    this.#noRetry = noRetry;
-  }
-  scheduledTime;
-  cron;
-  static {
-    __name(this, "__Facade_ScheduledController__");
-  }
-  #noRetry;
-  noRetry() {
-    if (!(this instanceof ___Facade_ScheduledController__)) {
-      throw new TypeError("Illegal invocation");
-    }
-    this.#noRetry();
-  }
-};
-function wrapExportedHandler(worker) {
-  if (__INTERNAL_WRANGLER_MIDDLEWARE__ === void 0 || __INTERNAL_WRANGLER_MIDDLEWARE__.length === 0) {
-    return worker;
-  }
-  for (const middleware of __INTERNAL_WRANGLER_MIDDLEWARE__) {
-    __facade_register__(middleware);
-  }
-  const fetchDispatcher = /* @__PURE__ */ __name(function(request, env, ctx) {
-    if (worker.fetch === void 0) {
-      throw new Error("Handler does not export a fetch() function.");
-    }
-    return worker.fetch(request, env, ctx);
-  }, "fetchDispatcher");
-  return {
-    ...worker,
-    fetch(request, env, ctx) {
-      const dispatcher = /* @__PURE__ */ __name(function(type, init) {
-        if (type === "scheduled" && worker.scheduled !== void 0) {
-          const controller = new __Facade_ScheduledController__(
-            Date.now(),
-            init.cron ?? "",
-            () => {
-            }
-          );
-          return worker.scheduled(controller, env, ctx);
-        }
-      }, "dispatcher");
-      return __facade_invoke__(request, env, ctx, dispatcher, fetchDispatcher);
-    }
-  };
-}
-__name(wrapExportedHandler, "wrapExportedHandler");
-function wrapWorkerEntrypoint(klass) {
-  if (__INTERNAL_WRANGLER_MIDDLEWARE__ === void 0 || __INTERNAL_WRANGLER_MIDDLEWARE__.length === 0) {
-    return klass;
-  }
-  for (const middleware of __INTERNAL_WRANGLER_MIDDLEWARE__) {
-    __facade_register__(middleware);
-  }
-  return class extends klass {
-    #fetchDispatcher = /* @__PURE__ */ __name((request, env, ctx) => {
-      this.env = env;
-      this.ctx = ctx;
-      if (super.fetch === void 0) {
-        throw new Error("Entrypoint class does not define a fetch() function.");
-      }
-      return super.fetch(request);
-    }, "#fetchDispatcher");
-    #dispatcher = /* @__PURE__ */ __name((type, init) => {
-      if (type === "scheduled" && super.scheduled !== void 0) {
-        const controller = new __Facade_ScheduledController__(
-          Date.now(),
-          init.cron ?? "",
-          () => {
-          }
-        );
-        return super.scheduled(controller);
-      }
-    }, "#dispatcher");
-    fetch(request) {
-      return __facade_invoke__(
-        request,
-        this.env,
-        this.ctx,
-        this.#dispatcher,
-        this.#fetchDispatcher
-      );
-    }
-  };
-}
-__name(wrapWorkerEntrypoint, "wrapWorkerEntrypoint");
-var WRAPPED_ENTRY;
-if (typeof middleware_insertion_facade_default === "object") {
-  WRAPPED_ENTRY = wrapExportedHandler(middleware_insertion_facade_default);
-} else if (typeof middleware_insertion_facade_default === "function") {
-  WRAPPED_ENTRY = wrapWorkerEntrypoint(middleware_insertion_facade_default);
-}
-var middleware_loader_entry_default = WRAPPED_ENTRY;
 export {
-  __INTERNAL_WRANGLER_MIDDLEWARE__,
-  middleware_loader_entry_default as default
+  pages_template_worker_default as default
 };
-//# sourceMappingURL=functionsWorker-0.10376763120450194.mjs.map

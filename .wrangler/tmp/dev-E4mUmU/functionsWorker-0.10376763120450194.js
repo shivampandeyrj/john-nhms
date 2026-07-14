@@ -221,12 +221,12 @@ async function onRequestPut({ request, env, params }) {
     const id = params.id;
     if (!id) return new Response(JSON.stringify({ error: "Missing ID parameter" }), { status: 400 });
     const body = await request.json();
-    const { slug, header, info, bullet_points, profile_photo, title, button_text, mail_content, pdf_url } = body;
+    const { slug, header, info, bullet_points, profile_photo, title, button_text, email_button_text, mail_content, pdf_url } = body;
     const stmt = env.DB.prepare(`
             UPDATE lead_magnets 
-            SET slug = ?, header = ?, info = ?, bullet_points = ?, profile_photo = ?, title = ?, button_text = ?, mail_content = ?, pdf_url = ?
+            SET slug = ?, header = ?, info = ?, bullet_points = ?, profile_photo = ?, title = ?, button_text = ?, email_button_text = ?, mail_content = ?, pdf_url = ?
             WHERE id = ?
-        `).bind(slug, header, info, bullet_points, profile_photo, title, button_text, mail_content, pdf_url || null, id);
+        `).bind(slug, header, info, bullet_points, profile_photo, title, button_text, email_button_text, mail_content, pdf_url || null, id);
     await stmt.run();
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
@@ -408,14 +408,14 @@ async function onRequestPost6({ request, env }) {
   }
   try {
     const body = await request.json();
-    const { slug, header, info, bullet_points, profile_photo, title, button_text, mail_content, pdf_url } = body;
+    const { slug, header, info, bullet_points, profile_photo, title, button_text, email_button_text, mail_content, pdf_url } = body;
     if (!slug || !header) {
       return new Response(JSON.stringify({ error: "Slug and header are required" }), { status: 400 });
     }
     const stmt = env.DB.prepare(`
-            INSERT INTO lead_magnets (slug, header, info, bullet_points, profile_photo, title, button_text, mail_content, pdf_url)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).bind(slug, header, info, bullet_points, profile_photo, title, button_text, mail_content, pdf_url || null);
+            INSERT INTO lead_magnets (slug, header, info, bullet_points, profile_photo, title, button_text, email_button_text, mail_content, pdf_url)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(slug, header, info, bullet_points, profile_photo, title, button_text, email_button_text, mail_content, pdf_url || null);
     const result = await stmt.run();
     return new Response(JSON.stringify({ success: true, id: result.meta.last_row_id }), {
       status: 200,
@@ -453,9 +453,10 @@ Here is your resource!`;
     let htmlMail = rawMail.replace(/\*(.*?)\*/g, '<span style="color: #0d9488; font-weight: 600;">$1</span>').replace(/\n/g, "<br>").replace(/\{name\}/g, name);
     let downloadButton = "";
     if (magnet.pdf_url) {
+      const btnText = (magnet.email_button_text || "Download Your PDF").replace(/\*/g, "");
       downloadButton = `
                 <div style="text-align: center; margin: 30px 0;">
-                    <a href="${magnet.pdf_url}" style="background-color: #0d9488; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px; display: inline-block;">Download Your PDF</a>
+                    <a href="${magnet.pdf_url}" style="background-color: #0d9488; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px; display: inline-block;">${btnText}</a>
                 </div>
             `;
     }

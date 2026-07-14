@@ -37,13 +37,13 @@ export async function onRequestPut({ request, env, params }) {
         if (!id) return new Response(JSON.stringify({ error: "Missing ID parameter" }), { status: 400 });
 
         const body = await request.json();
-        const { slug, header, info, bullet_points, profile_photo, title, button_text, mail_content, pdf_url } = body;
+        const { slug, header, info, bullet_points, profile_photo, title, button_text, email_button_text, mail_content, pdf_url } = body;
 
         const stmt = env.DB.prepare(`
             UPDATE lead_magnets 
-            SET slug = ?, header = ?, info = ?, bullet_points = ?, profile_photo = ?, title = ?, button_text = ?, mail_content = ?, pdf_url = ?
+            SET slug = ?, header = ?, info = ?, bullet_points = ?, profile_photo = ?, title = ?, button_text = ?, email_button_text = ?, mail_content = ?, pdf_url = ?
             WHERE id = ?
-        `).bind(slug, header, info, bullet_points, profile_photo, title, button_text, mail_content, pdf_url || null, id);
+        `).bind(slug, header, info, bullet_points, profile_photo, title, button_text, email_button_text, mail_content, pdf_url || null, id);
         
         await stmt.run();
 

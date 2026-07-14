@@ -1,310 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | NHMS</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <style>
-        .admin-layout {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            min-height: 100vh;
-        }
-        .sidebar {
-            background-color: rgba(0, 0, 0, 0.03);
-            padding: 2rem;
-            border-right: 1px solid var(--color-border);
-        }
-        .sidebar-nav {
-            list-style: none;
-            margin-top: 2rem;
-        }
-        .sidebar-nav li {
-            margin-bottom: 1rem;
-        }
-        .sidebar-nav a {
-            color: var(--color-text-secondary);
-            font-weight: 500;
-            text-decoration: none;
-            cursor: pointer;
-            display: block;
-            padding: 0.5rem;
-            border-radius: 4px;
-        }
-        .sidebar-nav a.active, .sidebar-nav a:hover {
-            color: var(--color-teal);
-            background: rgba(13, 148, 136, 0.1);
-        }
-        .main-content {
-            padding: 3rem;
-        }
-        .config-card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--color-border);
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-        
-        .split-view {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            align-items: start;
-        }
-        
-        .preview-container {
-            border: 1px solid var(--color-border);
-            background: var(--color-bg);
-            border-radius: 8px;
-            overflow: hidden;
-            position: sticky;
-            top: 2rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        
-        .preview-header {
-            background: rgba(0,0,0,0.05);
-            padding: 0.5rem 1rem;
-            border-bottom: 1px solid var(--color-border);
-            font-size: 0.85rem;
-            color: var(--color-text-secondary);
-            display: flex;
-            justify-content: space-between;
-        }
-        
-        #previewFrame, #emailPreviewFrame {
-            width: 100%;
-            height: 800px;
-            border: none;
-            background: #fff;
-        }
-        
-        .highlight-blue {
-            color: var(--color-teal);
-            font-weight: 600;
-        }
-
-        .tab-content {
-            display: none;
-        }
-        .tab-content.active {
-            display: block;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-        th, td {
-            padding: 0.75rem;
-            text-align: left;
-            border-bottom: 1px solid var(--color-border);
-        }
-        th {
-            color: var(--color-text-secondary);
-            font-weight: 600;
-        }
-    </style>
-</head>
-<body>
-    <div class="admin-layout">
-        <aside class="sidebar">
-            <a href="/" style="display: inline-block; margin-bottom: 2rem;">
-                <img src="assets/logo.png" alt="NHMS Logo" style="height: 35px; width: auto; max-width: 100%;">
-            </a>
-            
-            <ul class="sidebar-nav">
-                <li><a class="nav-tab active" data-target="tab-magnets">Lead Magnets</a></li>
-                <li><a class="nav-tab" data-target="tab-analytics">Analytics</a></li>
-                <li><a class="nav-tab" data-target="tab-links">Links & Redirects</a></li>
-                <li><a class="nav-tab" data-target="tab-settings">Settings</a></li>
-            </ul>
-        </aside>
-
-        <main class="main-content">
-            
-            <!-- Lead Magnets Tab -->
-            <section id="tab-magnets" class="tab-content active">
-                <h2 style="margin-bottom: 2rem;">Manage Lead Magnets</h2>
-                
-                <div id="magnetsList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 3rem;">
-                    <!-- Magnets will be rendered here dynamically -->
-                </div>
-
-                <div class="config-card" style="border-color: var(--color-teal);">
-                    <h3 style="margin-bottom: 1.5rem; color: var(--color-teal);" id="formTitle">Add New Lead Magnet</h3>
-                    
-                    <div class="split-view">
-                        <div>
-                            <form id="addMagnetForm">
-                                <input type="hidden" id="magId">
-                                <input type="hidden" id="existingPdfUrl">
-                                
-                                <div class="form-group">
-                                    <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">URL Slug (e.g., 10k-roadmap)</label>
-                                    <input type="text" id="magSlug" class="form-control" required>
-                                </div>
-                                <div class="form-group">
-                                    <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Header / Pre-Title</label>
-                                    <input type="text" id="magHeader" class="form-control" required>
-                                </div>
-                                <div class="form-group">
-                                    <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Title / Headline (Use *text* for blue)</label>
-                                    <input type="text" id="magTitle" class="form-control" required>
-                                </div>
-                                <div class="form-group">
-                                    <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Information / Subtitle (Use *text* for blue)</label>
-                                    <textarea id="magInfo" class="form-control" rows="3" required></textarea>
-                                </div>
-                                <div class="form-group">
-                                    <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Bullet Points (One per line, Use *text* for blue)</label>
-                                    <textarea id="magBullets" class="form-control" rows="4"></textarea>
-                                </div>
-                                <div class="form-group">
-                                    <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Landing Page Button Text</label>
-                                    <input type="text" id="magBtnText" class="form-control" required>
-                                </div>
-                                <div class="form-group">
-                                    <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Email Download Button Text</label>
-                                    <input type="text" id="magEmailBtnText" class="form-control" placeholder="Download Your PDF">
-                                </div>
-                                <div class="form-group">
-                                    <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Mail Content (Use *text* for blue styling)</label>
-                                    <textarea id="magMail" class="form-control" rows="6" required></textarea>
-                                </div>
-                                
-                                <div class="form-group" style="background: rgba(13, 148, 136, 0.1); padding: 1rem; border-radius: 8px; border: 1px dashed var(--color-teal);">
-                                    <label style="display: block; margin-bottom: 0.5rem; color: var(--color-teal); font-weight: 600;">Upload PDF</label>
-                                    <p style="font-size: 0.85rem; color: var(--color-text-secondary); margin-bottom: 0.5rem;" id="pdfStatus">Upload a new PDF to replace the existing one, or leave blank to keep current.</p>
-                                    <input type="file" id="magPdf" class="form-control" accept="application/pdf">
-                                    <div style="display: none;">
-                                        <input type="text" id="appScriptUrl" class="form-control" value="https://script.google.com/macros/s/AKfycby-YQnL8Z80z_s1-Zq5H9x7P_K_g5g-x_W_W_W_W_W/exec">
-                                    </div>
-                                </div>
-
-                                <div style="display: flex; gap: 1rem;">
-                                    <button type="submit" id="saveMagnetBtn" class="btn btn-primary" style="padding: 0.5rem 1.5rem; font-size: 1rem;">Save Lead Magnet</button>
-                                    <button type="button" id="cancelEditBtn" class="btn btn-outline" style="display: none;">Cancel</button>
-                                </div>
-                            </form>
-                        </div>
-                        
-                        <div class="preview-container">
-                            <div class="preview-header">
-                                <div style="display: flex; gap: 0.5rem;">
-                                    <button type="button" id="toggleWebPreview" class="btn" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;">Web Page</button>
-                                    <button type="button" id="toggleEmailPreview" class="btn btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.8rem;">Email Preview</button>
-                                </div>
-                                <span id="previewUrl">/slug</span>
-                            </div>
-                            <iframe id="previewFrame"></iframe>
-                            <iframe id="emailPreviewFrame" style="display: none; background: #ffffff;"></iframe>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Analytics Tab -->
-            <section id="tab-analytics" class="tab-content">
-                <h2 style="margin-bottom: 2rem;">Lead Analytics</h2>
-                <div class="config-card">
-                    <div style="display: flex; gap: 1rem; margin-bottom: 1rem; align-items: flex-end;">
-                        <div>
-                            <label style="display: block; font-size: 0.8rem; color: var(--color-text-secondary);">Year</label>
-                            <select id="filterYear" class="form-control" style="padding: 0.5rem; width: 100px;">
-                                <option value="">All</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label style="display: block; font-size: 0.8rem; color: var(--color-text-secondary);">Month</label>
-                            <select id="filterMonth" class="form-control" style="padding: 0.5rem; width: 120px;">
-                                <option value="">All</option>
-                                <option value="01">January</option>
-                                <option value="02">February</option>
-                                <option value="03">March</option>
-                                <option value="04">April</option>
-                                <option value="05">May</option>
-                                <option value="06">June</option>
-                                <option value="07">July</option>
-                                <option value="08">August</option>
-                                <option value="09">September</option>
-                                <option value="10">October</option>
-                                <option value="11">November</option>
-                                <option value="12">December</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label style="display: block; font-size: 0.8rem; color: var(--color-text-secondary);">Day</label>
-                            <select id="filterDay" class="form-control" style="padding: 0.5rem; width: 100px;">
-                                <option value="">All</option>
-                            </select>
-                        </div>
-                        <div style="flex-grow: 1;">
-                            <label style="display: block; font-size: 0.8rem; color: var(--color-text-secondary);">Search</label>
-                            <input type="text" id="filterSearch" class="form-control" style="padding: 0.5rem;" placeholder="Search Name, Email, or Magnet...">
-                        </div>
-                        <button id="downloadCsvBtn" class="btn btn-outline" style="border-color: var(--color-teal); color: var(--color-teal);">Download CSV</button>
-                        <button id="copyEmailsBtn" class="btn btn-outline" style="border-color: var(--color-teal); color: var(--color-teal);">Copy Emails (CC Format)</button>
-                    </div>
-                    
-                    <div style="overflow-x: auto;">
-                        <table id="analyticsTable">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Phone</th>
-                                    <th>Magnet</th>
-                                    <th>Date</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="analyticsTableBody">
-                                <!-- Data injected here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Links Tab -->
-            <section id="tab-links" class="tab-content">
-                <h2 style="margin-bottom: 2rem;">Global Links & Redirects</h2>
-                
-                <div class="config-card">
-                    <div class="form-group">
-                        <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Booking Widget Source URL (for /call)</label>
-                        <input type="text" id="bookingUrlInput" class="form-control" value="https://api.leadconnectorhq.com/widget/bookings/strategy-call-john-atkins">
-                    </div>
-                    <div class="form-group">
-                        <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Webinar Link (Live Event URL)</label>
-                        <input type="text" id="webinarUrlInput" class="form-control" placeholder="https://zoom.us/j/...">
-                    </div>
-                    <button id="saveLinksBtn" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Save Links</button>
-                </div>
-            </section>
-
-            <!-- Settings Tab -->
-            <section id="tab-settings" class="tab-content">
-                <h2 style="margin-bottom: 2rem;">Settings</h2>
-                
-                <div class="config-card">
-                    <h3 style="margin-bottom: 1.5rem;">Authentication</h3>
-                    <p style="color: var(--color-text-secondary); line-height: 1.6;">You are currently logged in via secure, passwordless OTP authentication. Your session will remain active for 30 days unless you manually log out.</p>
-                </div>
-
-                <div class="config-card" style="border-color: #ff4d4d;">
-                    <h3 style="margin-bottom: 1.5rem; color: #ff4d4d;">Session</h3>
-                    <button id="logoutBtn" class="btn btn-primary" style="background: #ff4d4d;">Log Out</button>
-                </div>
-            </section>
-
-        </main>
-    </div>
-
-    <script>
         document.addEventListener('DOMContentLoaded', async () => {
             // --- Tab Navigation Logic ---
             const navTabs = document.querySelectorAll('.nav-tab');
@@ -519,17 +212,7 @@
                 const formattedMail = formatBlueText(rawMail).replace(/\\n/g, '<br>').replace(/{name}/g, 'John Doe');
                 const logoUrl = window.location.origin + '/assets/logo.png';
                 
-                const emailBtnText = (document.getElementById('magEmailBtnText').value || 'Download Your PDF').replace(/\\*/g, '');
-                const hasPdf = document.getElementById('existingPdfUrl').value || document.getElementById('magPdf').files.length > 0;
-                
-                let previewDownloadBtnHtml = '';
-                if (hasPdf) {
-                    previewDownloadBtnHtml = `
-                        <div style="text-align: center; margin: 30px 0;">
-                            <a href="javascript:void(0);" style="background-color: #0d9488; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px; display: inline-block;">${emailBtnText}</a>
-                        </div>
-                    `;
-                }
+                const btnText = (document.getElementById('magBtnText').value || 'Download Your PDF').replace(/\\*/g, '');
                 
                 const emailHtml = `
                 <!DOCTYPE html>
@@ -541,7 +224,9 @@
                         </div>
                         <div style="font-size: 16px;">
                             ${formattedMail}
-                            ${previewDownloadBtnHtml}
+                            <div style="text-align: center; margin: 30px 0;">
+                                <a href="#" style="background-color: #0d9488; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px; display: inline-block;">${btnText}</a>
+                            </div>
                         </div>
                         <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eeeeee; font-size: 12px; color: #888888;">
                             <p>You received this email because you requested a resource from NHMS.</p>
@@ -553,7 +238,7 @@
                 document.getElementById('emailPreviewFrame').srcdoc = emailHtml;
             }
 
-            const inputs = ['magSlug', 'magHeader', 'magTitle', 'magInfo', 'magBullets', 'magBtnText', 'magEmailBtnText', 'magMail', 'magPdf'];
+            const inputs = ['magSlug', 'magHeader', 'magTitle', 'magInfo', 'magBullets', 'magBtnText', 'magMail'];
             inputs.forEach(id => {
                 document.getElementById(id).addEventListener('input', updatePreview);
             });
@@ -616,7 +301,6 @@
                 document.getElementById('magInfo').value = mag.info || '';
                 document.getElementById('magBullets').value = mag.bullet_points || '';
                 document.getElementById('magBtnText').value = mag.button_text || '';
-                document.getElementById('magEmailBtnText').value = mag.email_button_text || '';
                 document.getElementById('magMail').value = mag.mail_content || '';
                 document.getElementById('existingPdfUrl').value = mag.pdf_url || '';
                 
@@ -684,7 +368,6 @@
                         bullet_points: document.getElementById('magBullets').value,
                         profile_photo: 'assets/john-atkins.jpeg', // Always default
                         button_text: document.getElementById('magBtnText').value,
-                        email_button_text: document.getElementById('magEmailBtnText').value,
                         mail_content: document.getElementById('magMail').value,
                         pdf_url: finalPdfUrl
                     };
@@ -732,6 +415,3 @@
             // Initial loads
             loadMagnets();
         });
-    </script>
-</body>
-</html>

@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS lead_magnets (
     profile_photo TEXT,
     title TEXT,
     button_text TEXT,
+    email_button_text TEXT,
     mail_content TEXT,
     pdf_url TEXT
 );
