@@ -43,30 +43,61 @@
         <img src="assets/logo.png" alt="NHMS Logo">
         <h2 style="margin-bottom: 1.5rem;">Admin Access</h2>
         
-        <div class="error-message" id="errorMessage">Invalid username or password</div>
+        <div class="error-message" id="errorMessage">Invalid OTP</div>
         
-        <form id="loginForm">
+        <div id="step1">
+            <p style="color: var(--color-text-secondary); margin-bottom: 1.5rem;">Click below to send a secure, one-time passcode to the admin email.</p>
+            <button id="requestOtpBtn" class="btn btn-outline" style="width: 100%;">Send Login OTP</button>
+        </div>
+
+        <form id="loginForm" style="display: none;">
+            <p style="color: var(--color-teal); margin-bottom: 1rem; font-weight: 500;">OTP sent! Check John's email.</p>
             <div class="form-group">
-                <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Username</label>
-                <input type="text" name="username" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Password</label>
-                <input type="password" name="password" class="form-control" required>
+                <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">6-Digit OTP</label>
+                <input type="text" name="otp" id="otpInput" class="form-control" required placeholder="123456" maxlength="6">
             </div>
             <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" id="loginBtn">Log In</button>
         </form>
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        const requestBtn = document.getElementById('requestOtpBtn');
+        const loginForm = document.getElementById('loginForm');
+        const step1 = document.getElementById('step1');
+        const errorMsg = document.getElementById('errorMessage');
+
+        requestBtn.addEventListener('click', async () => {
+            requestBtn.disabled = true;
+            requestBtn.textContent = 'Sending...';
+            errorMsg.style.display = 'none';
+
+            try {
+                const res = await fetch('/api/auth/otp', { method: 'POST' });
+                if (res.ok) {
+                    step1.style.display = 'none';
+                    loginForm.style.display = 'block';
+                    document.getElementById('otpInput').focus();
+                } else {
+                    const data = await res.json();
+                    errorMsg.textContent = data.error || 'Failed to send OTP (Rate limited).';
+                    errorMsg.style.display = 'block';
+                    requestBtn.disabled = false;
+                    requestBtn.textContent = 'Send Login OTP';
+                }
+            } catch (err) {
+                errorMsg.textContent = 'Network error.';
+                errorMsg.style.display = 'block';
+                requestBtn.disabled = false;
+                requestBtn.textContent = 'Send Login OTP';
+            }
+        });
+
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const btn = document.getElementById('loginBtn');
-            const errorMsg = document.getElementById('errorMessage');
-            
             btn.disabled = true;
-            btn.textContent = 'Logging in...';
+            btn.textContent = 'Verifying...';
             errorMsg.style.display = 'none';
             
             const formData = new FormData(e.target);
@@ -82,6 +113,7 @@
                 if (response.ok) {
                     window.location.href = '/admin.html';
                 } else {
+                    errorMsg.textContent = 'Invalid or expired OTP.';
                     errorMsg.style.display = 'block';
                     btn.disabled = false;
                     btn.textContent = 'Log In';

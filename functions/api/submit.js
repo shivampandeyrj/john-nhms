@@ -60,17 +60,14 @@ export async function onRequestPost({ request, env }) {
         const plainTextMail = rawMail.replace(/\*(.*?)\*/g, '$1') + (magnet.pdf_url ? `\n\nDownload link: ${magnet.pdf_url}` : '');
         const subject = `Your resource is here: ${magnet.title || magnet.header || magnetType}`;
 
-        // 4. Fetch Apps Script Configuration
-        const urlStmt = env.DB.prepare('SELECT value FROM config WHERE key = "apps_script_url"');
-        const secretStmt = env.DB.prepare('SELECT value FROM config WHERE key = "apps_script_secret"');
-        
-        const urlRow = await urlStmt.first();
-        const secretRow = await secretStmt.first();
+        // 4. Fetch Apps Script Configuration from Secrets
+        const appsScriptUrl = env.APPS_SCRIPT_URL;
+        const appsScriptSecret = env.APPS_SCRIPT_SECRET;
 
-        if (urlRow && urlRow.value) {
+        if (appsScriptUrl) {
             const formData = new URLSearchParams();
             formData.append('action', 'sendLeadEmail');
-            formData.append('secret', secretRow ? secretRow.value : '');
+            formData.append('secret', appsScriptSecret || '');
             formData.append('email', email);
             formData.append('name', name);
             formData.append('phone', phone || '');
@@ -80,7 +77,7 @@ export async function onRequestPost({ request, env }) {
             formData.append('htmlBody', fullHtmlEmail);
 
             // 5. Trigger Secure Apps Script
-            await fetch(urlRow.value, {
+            await fetch(appsScriptUrl, {
                 method: 'POST',
                 body: formData,
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' }

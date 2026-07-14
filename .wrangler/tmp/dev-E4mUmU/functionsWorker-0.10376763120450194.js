@@ -58,34 +58,37 @@ globalThis.fetch = new Proxy(globalThis.fetch, {
 async function onRequestPost({ request, env }) {
   try {
     const body = await request.json();
-    const { username, password } = body;
-    if (!username || !password) {
-      return new Response(JSON.stringify({ error: "Missing credentials" }), {
+    const { otp } = body;
+    if (!otp) {
+      return new Response(JSON.stringify({ error: "Missing OTP" }), {
         status: 400,
         headers: { "Content-Type": "application/json" }
       });
     }
-    const stmt = env.DB.prepare("SELECT password_hash FROM admin WHERE username = ?").bind(username);
-    const user = await stmt.first();
-    const encoder = new TextEncoder();
-    const data = encoder.encode(password);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashedPassword = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-    if (user && user.password_hash === hashedPassword) {
-      return new Response(JSON.stringify({ success: true }), {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          "Set-Cookie": `admin_session=true; HttpOnly; Secure; Path=/; Max-Age=86400; SameSite=Strict`
-        }
-      });
-    } else {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+    const stmt = env.DB.prepare("SELECT * FROM otp_codes WHERE code = ? ORDER BY id DESC LIMIT 1").bind(otp);
+    const otpRecord = await stmt.first();
+    if (!otpRecord) {
+      return new Response(JSON.stringify({ error: "Invalid OTP" }), {
         status: 401,
         headers: { "Content-Type": "application/json" }
       });
     }
+    const now = /* @__PURE__ */ new Date();
+    const expiresAt = new Date(otpRecord.expires_at);
+    if (now > expiresAt) {
+      return new Response(JSON.stringify({ error: "OTP has expired" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+    await env.DB.prepare("DELETE FROM otp_codes WHERE code = ?").bind(otp).run();
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Set-Cookie": `admin_session=true; HttpOnly; Secure; Path=/; Max-Age=2592000; SameSite=Strict`
+      }
+    });
   } catch (e) {
     return new Response(JSON.stringify({ error: "Server Error", details: e.message }), {
       status: 500,
@@ -106,18 +109,24 @@ async function onRequestPost2() {
 }
 __name(onRequestPost2, "onRequestPost2");
 __name2(onRequestPost2, "onRequestPost");
-async function onRequestPost3({ request, env }) {
-  const cookieHeader = request.headers.get("Cookie");
-  if (!cookieHeader || !cookieHeader.includes("admin_session=true")) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+async function onRequestPost3({ request, env, waitUntil }) {
+  const ip = request.headers.get("cf-connecting-ip") || "unknown";
+  const cacheUrl = new URL(request.url);
+  cacheUrl.pathname = `/rate-limit-otp/${ip}`;
+  const cacheKey = new Request(cacheUrl.toString());
+  const cache = caches.default;
+  let rateLimitResponse = await cache.match(cacheKey);
+  if (rateLimitResponse) {
+    return new Response(JSON.stringify({ error: "Too many OTP requests. Please wait 2 minutes." }), {
+      status: 429,
+      headers: { "Content-Type": "application/json" }
+    });
   }
   try {
-    const urlStmt = env.DB.prepare('SELECT value FROM config WHERE key = "apps_script_url"');
-    const secretStmt = env.DB.prepare('SELECT value FROM config WHERE key = "apps_script_secret"');
-    const urlRow = await urlStmt.first();
-    const secretRow = await secretStmt.first();
-    if (!urlRow || !urlRow.value) {
-      return new Response(JSON.stringify({ error: "Apps Script URL not configured" }), { status: 500 });
+    const appsScriptUrl = env.APPS_SCRIPT_URL;
+    const appsScriptSecret = env.APPS_SCRIPT_SECRET;
+    if (!appsScriptUrl || !appsScriptSecret) {
+      return new Response(JSON.stringify({ error: "Apps Script Secrets not configured in Cloudflare" }), { status: 500 });
     }
     const otp = Math.floor(1e5 + Math.random() * 9e5).toString();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1e3).toISOString();
@@ -125,15 +134,21 @@ async function onRequestPost3({ request, env }) {
     await stmt.run();
     const formData = new URLSearchParams();
     formData.append("action", "sendOtp");
-    formData.append("secret", secretRow ? secretRow.value : "");
+    formData.append("secret", appsScriptSecret);
     formData.append("otp", otp);
-    const emailRes = await fetch(urlRow.value, {
+    const emailRes = await fetch(appsScriptUrl, {
       method: "POST",
       body: formData,
       headers: {
         "Content-Type": "application/x-www-form-urlencoded"
       }
     });
+    const newRateLimitRes = new Response("locked", {
+      status: 200,
+      headers: { "Cache-Control": "public, max-age=120" }
+      // Lock for 2 mins
+    });
+    waitUntil(cache.put(cacheKey, newRateLimitRes));
     return new Response(JSON.stringify({ success: true, message: "OTP sent successfully" }), {
       status: 200,
       headers: { "Content-Type": "application/json" }
@@ -147,43 +162,6 @@ async function onRequestPost3({ request, env }) {
 }
 __name(onRequestPost3, "onRequestPost3");
 __name2(onRequestPost3, "onRequestPost");
-async function onRequestPost4({ request, env }) {
-  const cookieHeader = request.headers.get("Cookie");
-  if (!cookieHeader || !cookieHeader.includes("admin_session=true")) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
-  }
-  try {
-    const body = await request.json();
-    const { otp, newPassword } = body;
-    if (!otp || !newPassword) {
-      return new Response(JSON.stringify({ error: "OTP and new password are required" }), { status: 400 });
-    }
-    const stmt = env.DB.prepare('SELECT id FROM otp_codes WHERE code = ? AND expires_at > datetime("now") ORDER BY id DESC LIMIT 1').bind(otp);
-    const validOtp = await stmt.first();
-    if (!validOtp) {
-      return new Response(JSON.stringify({ error: "Invalid or expired OTP" }), { status: 400 });
-    }
-    await env.DB.prepare("DELETE FROM otp_codes WHERE id = ?").bind(validOtp.id).run();
-    const encoder = new TextEncoder();
-    const data = encoder.encode(newPassword);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashedPassword = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-    const updateStmt = env.DB.prepare('UPDATE admin SET password_hash = ? WHERE username = "admin"').bind(hashedPassword);
-    await updateStmt.run();
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" }
-    });
-  } catch (e) {
-    return new Response(JSON.stringify({ error: "Server Error", details: e.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" }
-    });
-  }
-}
-__name(onRequestPost4, "onRequestPost4");
-__name2(onRequestPost4, "onRequestPost");
 async function onRequestDelete({ request, env, params }) {
   const cookieHeader = request.headers.get("Cookie");
   if (!cookieHeader || !cookieHeader.includes("admin_session=true")) {
@@ -296,7 +274,7 @@ async function onRequestGet({ request, env, waitUntil }) {
 }
 __name(onRequestGet, "onRequestGet");
 __name2(onRequestGet, "onRequestGet");
-async function onRequestPost5({ request, env }) {
+async function onRequestPost4({ request, env }) {
   const cookieHeader = request.headers.get("Cookie");
   if (!cookieHeader || !cookieHeader.includes("admin_session=true")) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -326,8 +304,8 @@ async function onRequestPost5({ request, env }) {
     });
   }
 }
-__name(onRequestPost5, "onRequestPost5");
-__name2(onRequestPost5, "onRequestPost");
+__name(onRequestPost4, "onRequestPost4");
+__name2(onRequestPost4, "onRequestPost");
 async function onRequestGet2({ request, env }) {
   const cookieHeader = request.headers.get("Cookie");
   if (!cookieHeader || !cookieHeader.includes("admin_session=true")) {
@@ -349,7 +327,7 @@ async function onRequestGet2({ request, env }) {
 }
 __name(onRequestGet2, "onRequestGet2");
 __name2(onRequestGet2, "onRequestGet");
-async function onRequestPost6({ request, env }) {
+async function onRequestPost5({ request, env }) {
   try {
     const body = await request.json();
     const { name, email, phone, magnet_type } = body;
@@ -375,8 +353,8 @@ async function onRequestPost6({ request, env }) {
     });
   }
 }
-__name(onRequestPost6, "onRequestPost6");
-__name2(onRequestPost6, "onRequestPost");
+__name(onRequestPost5, "onRequestPost5");
+__name2(onRequestPost5, "onRequestPost");
 async function onRequestGet3({ request, env }) {
   const cookieHeader = request.headers.get("Cookie");
   if (!cookieHeader || !cookieHeader.includes("admin_session=true")) {
@@ -398,7 +376,7 @@ async function onRequestGet3({ request, env }) {
 }
 __name(onRequestGet3, "onRequestGet3");
 __name2(onRequestGet3, "onRequestGet");
-async function onRequestPost7({ request, env }) {
+async function onRequestPost6({ request, env }) {
   const cookieHeader = request.headers.get("Cookie");
   if (!cookieHeader || !cookieHeader.includes("admin_session=true")) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
@@ -425,9 +403,9 @@ async function onRequestPost7({ request, env }) {
     });
   }
 }
-__name(onRequestPost7, "onRequestPost7");
-__name2(onRequestPost7, "onRequestPost");
-async function onRequestPost8({ request, env }) {
+__name(onRequestPost6, "onRequestPost6");
+__name2(onRequestPost6, "onRequestPost");
+async function onRequestPost7({ request, env }) {
   try {
     const body = await request.json();
     const { name, email, phone, magnetType } = body;
@@ -478,14 +456,12 @@ Here is your resource!`;
 
 Download link: ${magnet.pdf_url}` : "");
     const subject = `Your resource is here: ${magnet.title || magnet.header || magnetType}`;
-    const urlStmt = env.DB.prepare('SELECT value FROM config WHERE key = "apps_script_url"');
-    const secretStmt = env.DB.prepare('SELECT value FROM config WHERE key = "apps_script_secret"');
-    const urlRow = await urlStmt.first();
-    const secretRow = await secretStmt.first();
-    if (urlRow && urlRow.value) {
+    const appsScriptUrl = env.APPS_SCRIPT_URL;
+    const appsScriptSecret = env.APPS_SCRIPT_SECRET;
+    if (appsScriptUrl) {
       const formData = new URLSearchParams();
       formData.append("action", "sendLeadEmail");
-      formData.append("secret", secretRow ? secretRow.value : "");
+      formData.append("secret", appsScriptSecret || "");
       formData.append("email", email);
       formData.append("name", name);
       formData.append("phone", phone || "");
@@ -493,7 +469,7 @@ Download link: ${magnet.pdf_url}` : "");
       formData.append("subject", subject);
       formData.append("plainText", plainTextMail);
       formData.append("htmlBody", fullHtmlEmail);
-      await fetch(urlRow.value, {
+      await fetch(appsScriptUrl, {
         method: "POST",
         body: formData,
         headers: { "Content-Type": "application/x-www-form-urlencoded" }
@@ -507,9 +483,9 @@ Download link: ${magnet.pdf_url}` : "");
     return new Response(JSON.stringify({ error: "Server Error", details: e.message }), { status: 500 });
   }
 }
-__name(onRequestPost8, "onRequestPost8");
-__name2(onRequestPost8, "onRequestPost");
-async function onRequestPost9({ request, env }) {
+__name(onRequestPost7, "onRequestPost7");
+__name2(onRequestPost7, "onRequestPost");
+async function onRequestPost8({ request, env }) {
   const cookieHeader = request.headers.get("Cookie");
   if (!cookieHeader || !cookieHeader.includes("admin_session=true")) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
@@ -520,19 +496,17 @@ async function onRequestPost9({ request, env }) {
     if (!fileName || !fileData) {
       return new Response(JSON.stringify({ error: "Missing file details" }), { status: 400 });
     }
-    const urlStmt = env.DB.prepare('SELECT value FROM config WHERE key = "apps_script_url"');
-    const secretStmt = env.DB.prepare('SELECT value FROM config WHERE key = "apps_script_secret"');
-    const urlRow = await urlStmt.first();
-    const secretRow = await secretStmt.first();
-    if (!urlRow || !urlRow.value) {
-      return new Response(JSON.stringify({ error: "Apps Script URL not configured" }), { status: 500 });
+    const appsScriptUrl = env.APPS_SCRIPT_URL;
+    const appsScriptSecret = env.APPS_SCRIPT_SECRET;
+    if (!appsScriptUrl || !appsScriptSecret) {
+      return new Response(JSON.stringify({ error: "Apps Script Secrets not configured in Cloudflare" }), { status: 500 });
     }
     const formData = new URLSearchParams();
     formData.append("action", "upload");
-    formData.append("secret", secretRow ? secretRow.value : "");
+    formData.append("secret", appsScriptSecret);
     formData.append("fileName", fileName);
     formData.append("fileData", fileData);
-    const uploadRes = await fetch(urlRow.value, {
+    const uploadRes = await fetch(appsScriptUrl, {
       method: "POST",
       body: formData,
       headers: {
@@ -548,8 +522,8 @@ async function onRequestPost9({ request, env }) {
     return new Response(JSON.stringify({ error: "Server Error", details: e.message }), { status: 500 });
   }
 }
-__name(onRequestPost9, "onRequestPost9");
-__name2(onRequestPost9, "onRequestPost");
+__name(onRequestPost8, "onRequestPost8");
+__name2(onRequestPost8, "onRequestPost");
 async function onRequest(context) {
   const { request, next } = context;
   const cookieHeader = request.headers.get("Cookie");
@@ -656,13 +630,6 @@ var routes = [
     modules: [onRequestPost3]
   },
   {
-    routePath: "/api/auth/password",
-    mountPath: "/api/auth",
-    method: "POST",
-    middlewares: [],
-    modules: [onRequestPost4]
-  },
-  {
     routePath: "/api/magnets/:id",
     mountPath: "/api/magnets",
     method: "DELETE",
@@ -688,7 +655,7 @@ var routes = [
     mountPath: "/api",
     method: "POST",
     middlewares: [],
-    modules: [onRequestPost5]
+    modules: [onRequestPost4]
   },
   {
     routePath: "/api/leads",
@@ -702,7 +669,7 @@ var routes = [
     mountPath: "/api",
     method: "POST",
     middlewares: [],
-    modules: [onRequestPost6]
+    modules: [onRequestPost5]
   },
   {
     routePath: "/api/magnets",
@@ -716,21 +683,21 @@ var routes = [
     mountPath: "/api",
     method: "POST",
     middlewares: [],
-    modules: [onRequestPost7]
+    modules: [onRequestPost6]
   },
   {
     routePath: "/api/submit",
     mountPath: "/api",
     method: "POST",
     middlewares: [],
-    modules: [onRequestPost8]
+    modules: [onRequestPost7]
   },
   {
     routePath: "/api/upload",
     mountPath: "/api",
     method: "POST",
     middlewares: [],
-    modules: [onRequestPost9]
+    modules: [onRequestPost8]
   },
   {
     routePath: "/admin",

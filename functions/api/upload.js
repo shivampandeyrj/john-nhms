@@ -12,24 +12,21 @@ export async function onRequestPost({ request, env }) {
             return new Response(JSON.stringify({ error: "Missing file details" }), { status: 400 });
         }
 
-        // Fetch Apps Script Configuration
-        const urlStmt = env.DB.prepare('SELECT value FROM config WHERE key = "apps_script_url"');
-        const secretStmt = env.DB.prepare('SELECT value FROM config WHERE key = "apps_script_secret"');
-        
-        const urlRow = await urlStmt.first();
-        const secretRow = await secretStmt.first();
+        // Fetch Apps Script Configuration from Secrets
+        const appsScriptUrl = env.APPS_SCRIPT_URL;
+        const appsScriptSecret = env.APPS_SCRIPT_SECRET;
 
-        if (!urlRow || !urlRow.value) {
-            return new Response(JSON.stringify({ error: "Apps Script URL not configured" }), { status: 500 });
+        if (!appsScriptUrl || !appsScriptSecret) {
+            return new Response(JSON.stringify({ error: "Apps Script Secrets not configured in Cloudflare" }), { status: 500 });
         }
 
         const formData = new URLSearchParams();
         formData.append('action', 'upload');
-        formData.append('secret', secretRow ? secretRow.value : '');
+        formData.append('secret', appsScriptSecret);
         formData.append('fileName', fileName);
         formData.append('fileData', fileData);
 
-        const uploadRes = await fetch(urlRow.value, {
+        const uploadRes = await fetch(appsScriptUrl, {
             method: 'POST',
             body: formData,
             headers: {
