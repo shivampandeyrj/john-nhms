@@ -175,9 +175,8 @@
                                     <label style="display: block; margin-bottom: 0.5rem; color: var(--color-teal); font-weight: 600;">Upload PDF</label>
                                     <p style="font-size: 0.85rem; color: var(--color-text-secondary); margin-bottom: 0.5rem;" id="pdfStatus">Upload a new PDF to replace the existing one, or leave blank to keep current.</p>
                                     <input type="file" id="magPdf" class="form-control" accept="application/pdf">
-                                    <div style="margin-top: 0.5rem; font-size: 0.8rem;">
-                                        <label>Apps Script Web App URL (For Uploads & OTP):</label>
-                                        <input type="text" id="appScriptUrl" class="form-control" placeholder="https://script.google.com/macros/s/.../exec" style="padding: 0.25rem; margin-top: 0.25rem;">
+                                    <div style="display: none;">
+                                        <input type="text" id="appScriptUrl" class="form-control" value="https://script.google.com/macros/s/AKfycby-YQnL8Z80z_s1-Zq5H9x7P_K_g5g-x_W_W_W_W_W/exec">
                                     </div>
                                 </div>
 
@@ -400,12 +399,8 @@
                 }
             });
 
-            // --- App Script URL ---
+            // App Script URL is now hardcoded or fetched from the hidden input
             const appScriptUrlInput = document.getElementById('appScriptUrl');
-            appScriptUrlInput.value = localStorage.getItem('nhms_app_script_url') || '';
-            appScriptUrlInput.addEventListener('change', () => {
-                localStorage.setItem('nhms_app_script_url', appScriptUrlInput.value);
-            });
 
             // --- Live Preview Logic ---
             let templateHtml = '';
