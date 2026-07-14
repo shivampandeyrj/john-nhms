@@ -60,6 +60,18 @@ function handleSendLeadEmail(e) {
     name: SENDER_NAME
   });
 
+  // Add Lead to Google Group
+  try {
+    const groupEmail = "community@newhabitsmindsetshifts.com";
+    AdminDirectory.Members.insert({
+      email: email,
+      role: "MEMBER"
+    }, groupEmail);
+  } catch (err) {
+    console.error("Failed to add to Google Group:", err);
+    // Continue execution even if group add fails (e.g., if they are already a member)
+  }
+
   // Send Alert Email to Admin
   MailApp.sendEmail(
     NOTIFICATION_EMAIL, 
