@@ -41,17 +41,56 @@ export async function onRequestPost({ request, env }) {
         const fullHtmlEmail = `
             <!DOCTYPE html>
             <html>
-            <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1f2937; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <div style="text-align: center; margin-bottom: 30px; border-bottom: 1px solid #e5e7eb; padding-bottom: 20px;">
-                <img src="https://cdn.pixabay.com/photo/2017/02/18/19/20/logo-2078018_1280.png" alt="NHMS Logo" style="height: 50px;">
-                </div>
-                <div style="font-size: 16px;">
-                ${htmlMail}
-                ${downloadButton}
-                </div>
-                <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 14px; color: #6b7280;">
-                <p>You received this email because you requested a resource from NHMS.</p>
-                <p>&copy; ${new Date().getFullYear()} NHMS. All rights reserved.</p>
+            <head>
+                <style>
+                    body {
+                        font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                        background-color: #040b16;
+                        color: #f8fafc;
+                        margin: 0;
+                        padding: 40px 20px;
+                        line-height: 1.6;
+                    }
+                    .container {
+                        max-width: 600px;
+                        margin: 0 auto;
+                        background: rgba(255, 255, 255, 0.03);
+                        border: 1px solid rgba(255, 255, 255, 0.1);
+                        border-radius: 12px;
+                        padding: 30px;
+                    }
+                    .header {
+                        text-align: center;
+                        margin-bottom: 30px;
+                        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                        padding-bottom: 20px;
+                    }
+                    .content {
+                        font-size: 16px;
+                    }
+                    .footer {
+                        margin-top: 40px;
+                        padding-top: 20px;
+                        border-top: 1px solid rgba(255, 255, 255, 0.1);
+                        font-size: 14px;
+                        color: #9ca3af;
+                        text-align: center;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <img src="https://cdn.pixabay.com/photo/2017/02/18/19/20/logo-2078018_1280.png" alt="NHMS Logo" style="height: 50px;">
+                    </div>
+                    <div class="content">
+                        ${htmlMail}
+                        ${downloadButton}
+                    </div>
+                    <div class="footer">
+                        <p>You received this email because you requested a resource from NHMS.</p>
+                        <p>&copy; ${new Date().getFullYear()} NHMS. All rights reserved.</p>
+                    </div>
                 </div>
             </body>
             </html>
