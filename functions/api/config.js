@@ -1,4 +1,4 @@
-export async function onRequestGet({ request, env }) {
+export async function onRequestGet({ request, env, waitUntil }) {
     const url = new URL(request.url);
     const key = url.searchParams.get('key');
 
@@ -20,15 +20,37 @@ export async function onRequestGet({ request, env }) {
         });
     }
 
+    // Initialize Cache
+    const cacheUrl = new URL(request.url);
+    const cacheKey = new Request(cacheUrl.toString(), request);
+    const cache = caches.default;
+
+    // Only attempt to cache/serve from cache for public requests
+    if (allowedPublicKeys.includes(key) && !isAdmin) {
+        let cachedResponse = await cache.match(cacheKey);
+        if (cachedResponse) {
+            return cachedResponse;
+        }
+    }
+
     try {
         const stmt = env.DB.prepare('SELECT value FROM config WHERE key = ?').bind(key);
         const result = await stmt.first();
 
         if (result) {
-            return new Response(JSON.stringify({ value: result.value }), {
+            const response = new Response(JSON.stringify({ value: result.value }), {
                 status: 200,
-                headers: { 'Content-Type': 'application/json' }
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Cache-Control': 'public, max-age=300' // Cache for 5 mins
+                }
             });
+
+            if (allowedPublicKeys.includes(key) && !isAdmin) {
+                waitUntil(cache.put(cacheKey, response.clone()));
+            }
+
+            return response;
         } else {
             return new Response(JSON.stringify({ error: "Not found" }), { 
                 status: 404,

@@ -1,4 +1,4 @@
-export async function onRequestGet({ request, env, next, params }) {
+export async function onRequestGet({ request, env, next, params, waitUntil }) {
     const slugParams = params.slug;
     const slug = Array.isArray(slugParams) ? slugParams.join('/') : slugParams;
 
@@ -6,6 +6,17 @@ export async function onRequestGet({ request, env, next, params }) {
     if (!slug || slug === '' || 
         ['css', 'js', 'assets', 'api', 'admin', 'call'].includes(slug.split('/')[0])) {
         return next();
+    }
+
+    // Initialize Cache
+    const cacheUrl = new URL(request.url);
+    const cacheKey = new Request(cacheUrl.toString(), request);
+    const cache = caches.default;
+    
+    // Check if we have a cached response
+    let cachedResponse = await cache.match(cacheKey);
+    if (cachedResponse) {
+        return cachedResponse;
     }
 
     try {
@@ -66,11 +77,17 @@ export async function onRequestGet({ request, env, next, params }) {
         // Ensure proper content type
         const newHeaders = new Headers(modifiedRes.headers);
         newHeaders.set('Content-Type', 'text/html;charset=UTF-8');
+        newHeaders.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
         
-        return new Response(modifiedRes.body, {
+        const response = new Response(modifiedRes.body, {
             status: 200,
             headers: newHeaders
         });
+
+        // Store in cache without blocking the return
+        waitUntil(cache.put(cacheKey, response.clone()));
+
+        return response;
 
     } catch (e) {
         // Fallback to static serving on error

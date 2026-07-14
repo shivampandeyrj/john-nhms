@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
-// ../.wrangler/tmp/bundle-h5Pfac/checked-fetch.js
+// ../.wrangler/tmp/bundle-Nnx2xv/checked-fetch.js
 var urls = /* @__PURE__ */ new Set();
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
@@ -215,7 +215,7 @@ async function onRequestPut({ request, env, params }) {
 __name(onRequestPut, "onRequestPut");
 
 // api/config.js
-async function onRequestGet({ request, env }) {
+async function onRequestGet({ request, env, waitUntil }) {
   const url = new URL(request.url);
   const key = url.searchParams.get("key");
   if (!key) {
@@ -233,14 +233,31 @@ async function onRequestGet({ request, env }) {
       headers: { "Content-Type": "application/json" }
     });
   }
+  const cacheUrl = new URL(request.url);
+  const cacheKey = new Request(cacheUrl.toString(), request);
+  const cache = caches.default;
+  if (allowedPublicKeys.includes(key) && !isAdmin) {
+    let cachedResponse = await cache.match(cacheKey);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+  }
   try {
     const stmt = env.DB.prepare("SELECT value FROM config WHERE key = ?").bind(key);
     const result = await stmt.first();
     if (result) {
-      return new Response(JSON.stringify({ value: result.value }), {
+      const response = new Response(JSON.stringify({ value: result.value }), {
         status: 200,
-        headers: { "Content-Type": "application/json" }
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "public, max-age=300"
+          // Cache for 5 mins
+        }
       });
+      if (allowedPublicKeys.includes(key) && !isAdmin) {
+        waitUntil(cache.put(cacheKey, response.clone()));
+      }
+      return response;
     } else {
       return new Response(JSON.stringify({ error: "Not found" }), {
         status: 404,
@@ -525,11 +542,18 @@ async function onRequest(context) {
 __name(onRequest, "onRequest");
 
 // [[slug]].js
-async function onRequestGet4({ request, env, next, params }) {
+async function onRequestGet4({ request, env, next, params, waitUntil }) {
   const slugParams = params.slug;
   const slug = Array.isArray(slugParams) ? slugParams.join("/") : slugParams;
   if (!slug || slug === "" || ["css", "js", "assets", "api", "admin", "call"].includes(slug.split("/")[0])) {
     return next();
+  }
+  const cacheUrl = new URL(request.url);
+  const cacheKey = new Request(cacheUrl.toString(), request);
+  const cache = caches.default;
+  let cachedResponse = await cache.match(cacheKey);
+  if (cachedResponse) {
+    return cachedResponse;
   }
   try {
     const stmt = env.DB.prepare("SELECT * FROM lead_magnets WHERE slug = ?").bind(slug);
@@ -572,10 +596,13 @@ async function onRequestGet4({ request, env, next, params }) {
     const modifiedRes = rewriter.transform(templateRes);
     const newHeaders = new Headers(modifiedRes.headers);
     newHeaders.set("Content-Type", "text/html;charset=UTF-8");
-    return new Response(modifiedRes.body, {
+    newHeaders.set("Cache-Control", "public, max-age=300");
+    const response = new Response(modifiedRes.body, {
       status: 200,
       headers: newHeaders
     });
+    waitUntil(cache.put(cacheKey, response.clone()));
+    return response;
   } catch (e) {
     console.error("HTMLRewriter Error", e);
     return next();
@@ -1186,7 +1213,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// ../.wrangler/tmp/bundle-h5Pfac/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-Nnx2xv/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -1218,7 +1245,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// ../.wrangler/tmp/bundle-h5Pfac/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-Nnx2xv/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
