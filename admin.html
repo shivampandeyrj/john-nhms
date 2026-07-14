@@ -73,7 +73,7 @@
             justify-content: space-between;
         }
         
-        #previewFrame {
+        #previewFrame, #emailPreviewFrame {
             width: 100%;
             height: 800px;
             border: none;
@@ -515,6 +515,8 @@
                 const formattedMail = formatBlueText(rawMail).replace(/\\n/g, '<br>').replace(/{name}/g, 'John Doe');
                 const logoUrl = window.location.origin + '/assets/logo.png';
                 
+                const btnText = (document.getElementById('magBtnText').value || 'Download Your PDF').replace(/\\*/g, '');
+                
                 const emailHtml = `
                 <!DOCTYPE html>
                 <html>
@@ -526,7 +528,7 @@
                         <div style="font-size: 16px;">
                             ${formattedMail}
                             <div style="text-align: center; margin: 30px 0;">
-                                <a href="#" style="background-color: #0d9488; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px; display: inline-block;">Download Your PDF</a>
+                                <a href="#" style="background-color: #0d9488; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px; display: inline-block;">${btnText}</a>
                             </div>
                         </div>
                         <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eeeeee; font-size: 12px; color: #888888;">

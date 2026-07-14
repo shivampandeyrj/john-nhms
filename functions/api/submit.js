@@ -31,9 +31,10 @@ export async function onRequestPost({ request, env }) {
 
         let downloadButton = '';
         if (magnet.pdf_url) {
+            const btnText = (magnet.button_text || 'Download Your PDF').replace(/\*/g, '');
             downloadButton = `
                 <div style="text-align: center; margin: 30px 0;">
-                    <a href="${magnet.pdf_url}" style="background-color: #0d9488; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px; display: inline-block;">Download Your PDF</a>
+                    <a href="${magnet.pdf_url}" style="background-color: #0d9488; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px; display: inline-block;">${btnText}</a>
                 </div>
             `;
         }
