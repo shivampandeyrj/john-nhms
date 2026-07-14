@@ -13,7 +13,7 @@ const FOLDER_NAME = "lead maganet pdf dont delete";
 // IMPORTANT: Set this to a random password. It must exactly match
 // the "Apps Script Secret Token" you save in the Admin Dashboard!
 // -------------------------------------------------------------
-const SECRET_TOKEN = "SUPER_SECRET_TOKEN_123"; 
+const SECRET_TOKEN = "NHMS_k9$vP2m!L8xQ4wN7y@R5cT_2026"; 
 
 function doPost(e) {
   try {
