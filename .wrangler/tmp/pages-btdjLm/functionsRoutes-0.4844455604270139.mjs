@@ -1,6 +1,7 @@
 import { onRequestPost as __api_auth_login_js_onRequestPost } from "/home/shivam/Music/john  newhabitsmindsetshifts /functions/api/auth/login.js"
 import { onRequestPost as __api_auth_logout_js_onRequestPost } from "/home/shivam/Music/john  newhabitsmindsetshifts /functions/api/auth/logout.js"
 import { onRequestPost as __api_auth_otp_js_onRequestPost } from "/home/shivam/Music/john  newhabitsmindsetshifts /functions/api/auth/otp.js"
+import { onRequestDelete as __api_leads__id__js_onRequestDelete } from "/home/shivam/Music/john  newhabitsmindsetshifts /functions/api/leads/[id].js"
 import { onRequestDelete as __api_magnets__id__js_onRequestDelete } from "/home/shivam/Music/john  newhabitsmindsetshifts /functions/api/magnets/[id].js"
 import { onRequestPut as __api_magnets__id__js_onRequestPut } from "/home/shivam/Music/john  newhabitsmindsetshifts /functions/api/magnets/[id].js"
 import { onRequestGet as __api_config_js_onRequestGet } from "/home/shivam/Music/john  newhabitsmindsetshifts /functions/api/config.js"
@@ -35,6 +36,13 @@ export const routes = [
       method: "POST",
       middlewares: [],
       modules: [__api_auth_otp_js_onRequestPost],
+    },
+  {
+      routePath: "/api/leads/:id",
+      mountPath: "/api/leads",
+      method: "DELETE",
+      middlewares: [],
+      modules: [__api_leads__id__js_onRequestDelete],
     },
   {
       routePath: "/api/magnets/:id",

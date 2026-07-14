@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
-// ../.wrangler/tmp/bundle-9UwUDt/checked-fetch.js
+// ../.wrangler/tmp/bundle-wodWn0/checked-fetch.js
 var urls = /* @__PURE__ */ new Set();
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
@@ -137,8 +137,34 @@ async function onRequestPost3({ request, env, waitUntil }) {
 }
 __name(onRequestPost3, "onRequestPost");
 
-// api/magnets/[id].js
+// api/leads/[id].js
 async function onRequestDelete({ request, env, params }) {
+  const cookieHeader = request.headers.get("Cookie");
+  if (!cookieHeader || !cookieHeader.includes("admin_session=true")) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+  }
+  try {
+    const id = params.id;
+    if (!id) {
+      return new Response(JSON.stringify({ error: "Lead ID is required" }), { status: 400 });
+    }
+    const stmt = env.DB.prepare("DELETE FROM leads WHERE id = ?").bind(id);
+    await stmt.run();
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: "Server Error", details: e.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+}
+__name(onRequestDelete, "onRequestDelete");
+
+// api/magnets/[id].js
+async function onRequestDelete2({ request, env, params }) {
   const cookieHeader = request.headers.get("Cookie");
   if (!cookieHeader || !cookieHeader.includes("admin_session=true")) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
@@ -161,7 +187,7 @@ async function onRequestDelete({ request, env, params }) {
     });
   }
 }
-__name(onRequestDelete, "onRequestDelete");
+__name(onRequestDelete2, "onRequestDelete");
 async function onRequestPut({ request, env, params }) {
   const cookieHeader = request.headers.get("Cookie");
   if (!cookieHeader || !cookieHeader.includes("admin_session=true")) {
@@ -410,20 +436,27 @@ Here is your resource!`;
                 </div>
             `;
     }
+    const reqUrl = new URL(request.url);
+    const logoUrl = `${reqUrl.origin}/assets/logo.png`;
     const fullHtmlEmail = `
             <!DOCTYPE html>
             <html>
-            <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1f2937; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <div style="text-align: center; margin-bottom: 30px; border-bottom: 1px solid #e5e7eb; padding-bottom: 20px;">
-                <img src="https://cdn.pixabay.com/photo/2017/02/18/19/20/logo-2078018_1280.png" alt="NHMS Logo" style="height: 50px;">
-                </div>
-                <div style="font-size: 16px;">
-                ${htmlMail}
-                ${downloadButton}
-                </div>
-                <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 14px; color: #6b7280;">
-                <p>You received this email because you requested a resource from NHMS.</p>
-                <p>&copy; ${(/* @__PURE__ */ new Date()).getFullYear()} NHMS. All rights reserved.</p>
+            <body style="font-family: Arial, sans-serif; color: #333333; line-height: 1.6; margin: 0; padding: 20px;">
+                <div style="max-width: 600px; margin: 0 auto;">
+                    
+                    <div style="margin-bottom: 20px;">
+                        <img src="${logoUrl}" alt="NHMS Logo" style="height: 40px; display: block;">
+                    </div>
+                    
+                    <div style="font-size: 16px;">
+                        ${htmlMail}
+                        ${downloadButton}
+                    </div>
+                    
+                    <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eeeeee; font-size: 12px; color: #888888;">
+                        <p>You received this email because you requested a resource from NHMS.</p>
+                        <p>&copy; ${(/* @__PURE__ */ new Date()).getFullYear()} NHMS. All rights reserved.</p>
+                    </div>
                 </div>
             </body>
             </html>
@@ -607,11 +640,18 @@ var routes = [
     modules: [onRequestPost3]
   },
   {
+    routePath: "/api/leads/:id",
+    mountPath: "/api/leads",
+    method: "DELETE",
+    middlewares: [],
+    modules: [onRequestDelete]
+  },
+  {
     routePath: "/api/magnets/:id",
     mountPath: "/api/magnets",
     method: "DELETE",
     middlewares: [],
-    modules: [onRequestDelete]
+    modules: [onRequestDelete2]
   },
   {
     routePath: "/api/magnets/:id",
@@ -1179,7 +1219,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// ../.wrangler/tmp/bundle-9UwUDt/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-wodWn0/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -1211,7 +1251,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// ../.wrangler/tmp/bundle-9UwUDt/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-wodWn0/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

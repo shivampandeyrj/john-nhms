@@ -233,7 +233,11 @@
                                 <option value="">All</option>
                             </select>
                         </div>
-                        <div style="flex-grow: 1;"></div>
+                        <div style="flex-grow: 1;">
+                            <label style="display: block; font-size: 0.8rem; color: var(--color-text-secondary);">Search</label>
+                            <input type="text" id="filterSearch" class="form-control" style="padding: 0.5rem;" placeholder="Search Name, Email, or Magnet...">
+                        </div>
+                        <button id="downloadCsvBtn" class="btn btn-outline" style="border-color: var(--color-teal); color: var(--color-teal);">Download CSV</button>
                         <button id="copyEmailsBtn" class="btn btn-outline" style="border-color: var(--color-teal); color: var(--color-teal);">Copy Emails (CC Format)</button>
                     </div>
                     
@@ -246,6 +250,7 @@
                                     <th>Phone</th>
                                     <th>Magnet</th>
                                     <th>Date</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody id="analyticsTableBody">
@@ -341,6 +346,7 @@
                 const year = document.getElementById('filterYear').value;
                 const month = document.getElementById('filterMonth').value;
                 const day = document.getElementById('filterDay').value;
+                const search = document.getElementById('filterSearch').value.toLowerCase();
                 const tbody = document.getElementById('analyticsTableBody');
                 
                 tbody.innerHTML = '';
@@ -354,6 +360,12 @@
                     if (year && year !== leadYear) return false;
                     if (month && month !== leadMonth) return false;
                     if (day && day !== leadDay) return false;
+                    
+                    if (search) {
+                        const searchString = `${lead.name} ${lead.email} ${lead.magnet_type}`.toLowerCase();
+                        if (!searchString.includes(search)) return false;
+                    }
+                    
                     return true;
                 });
 
@@ -365,16 +377,19 @@
                             <td>${lead.phone || '-'}</td>
                             <td>${lead.magnet_type}</td>
                             <td>${new Date(lead.timestamp).toLocaleDateString()}</td>
+                            <td><button class="btn btn-outline" style="border-color: #ff4d4d; color: #ff4d4d; padding: 0.2rem 0.5rem; font-size: 0.8rem;" onclick="deleteLead(${lead.id})">Delete</button></td>
                         </tr>
                     `;
                 });
                 
+                window.currentFilteredLeads = filtered;
                 window.currentFilteredEmails = filtered.map(l => l.email).join(', ');
             }
 
             document.getElementById('filterYear').addEventListener('change', renderAnalytics);
             document.getElementById('filterMonth').addEventListener('change', renderAnalytics);
             document.getElementById('filterDay').addEventListener('change', renderAnalytics);
+            document.getElementById('filterSearch').addEventListener('input', renderAnalytics);
 
             document.getElementById('copyEmailsBtn').addEventListener('click', () => {
                 if (window.currentFilteredEmails) {
@@ -384,6 +399,50 @@
                     alert('No emails to copy.');
                 }
             });
+
+            document.getElementById('downloadCsvBtn').addEventListener('click', () => {
+                if (!window.currentFilteredLeads || window.currentFilteredLeads.length === 0) {
+                    alert('No data to download.');
+                    return;
+                }
+                const headers = ['Name', 'Email', 'Phone', 'Magnet Type', 'Date'];
+                const csvRows = [headers.join(',')];
+                
+                window.currentFilteredLeads.forEach(lead => {
+                    const row = [
+                        `"${lead.name.replace(/"/g, '""')}"`,
+                        `"${lead.email.replace(/"/g, '""')}"`,
+                        `"${(lead.phone || '').replace(/"/g, '""')}"`,
+                        `"${lead.magnet_type.replace(/"/g, '""')}"`,
+                        `"${new Date(lead.timestamp).toLocaleString()}"`
+                    ];
+                    csvRows.push(row.join(','));
+                });
+                
+                const csvContent = csvRows.join('\\n');
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", "nhms_leads.csv");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+
+            window.deleteLead = async function(id) {
+                if (!confirm('Are you sure you want to delete this lead? This action cannot be undone.')) return;
+                try {
+                    const res = await fetch('/api/leads/' + id, { method: 'DELETE' });
+                    if (res.ok) {
+                        loadAnalytics();
+                    } else {
+                        alert('Failed to delete lead.');
+                    }
+                } catch (e) {
+                    alert('Error: ' + e.message);
+                }
+            };
 
             // App Script URL is now hardcoded or fetched from the hidden input
             const appScriptUrlInput = document.getElementById('appScriptUrl');

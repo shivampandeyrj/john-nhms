@@ -38,29 +38,28 @@ export async function onRequestPost({ request, env }) {
             `;
         }
 
+        // Extract origin to construct absolute logo URL
+        const reqUrl = new URL(request.url);
+        const logoUrl = `${reqUrl.origin}/assets/logo.png`;
+
         const fullHtmlEmail = `
             <!DOCTYPE html>
             <html>
-            <body style="margin: 0; padding: 40px 20px; background-color: #ffffff; background-image: linear-gradient(135deg, #ffffff 40%, rgba(71, 138, 154, 0.08) 100%); font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #0F0D0E; line-height: 1.6;">
-                <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; border: 1px solid #E0E0E0; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+            <body style="font-family: Arial, sans-serif; color: #333333; line-height: 1.6; margin: 0; padding: 20px;">
+                <div style="max-width: 600px; margin: 0 auto;">
                     
-                    <!-- Blue Strip / Accent -->
-                    <div style="height: 8px; background-color: #478A9A; width: 100%;"></div>
-                    
-                    <div style="padding: 40px;">
-                        <div style="text-align: center; margin-bottom: 30px; border-bottom: 1px solid #E0E0E0; padding-bottom: 20px;">
-                            <img src="https://cdn.pixabay.com/photo/2017/02/18/19/20/logo-2078018_1280.png" alt="NHMS Logo" style="height: 50px;">
-                        </div>
-                        
-                        <div style="font-size: 16px; color: #4A4A4A;">
-                            ${htmlMail}
-                            ${downloadButton}
-                        </div>
+                    <div style="margin-bottom: 20px;">
+                        <img src="${logoUrl}" alt="NHMS Logo" style="height: 40px; display: block;">
                     </div>
                     
-                    <div style="background-color: rgba(71, 138, 154, 0.03); padding: 20px 40px; text-align: center; font-size: 13px; color: #6b7280; border-top: 1px solid #E0E0E0;">
-                        <p style="margin: 0;">You received this email because you requested a resource from NHMS.</p>
-                        <p style="margin: 5px 0 0 0;">&copy; ${new Date().getFullYear()} NHMS. All rights reserved.</p>
+                    <div style="font-size: 16px;">
+                        ${htmlMail}
+                        ${downloadButton}
+                    </div>
+                    
+                    <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eeeeee; font-size: 12px; color: #888888;">
+                        <p>You received this email because you requested a resource from NHMS.</p>
+                        <p>&copy; ${new Date().getFullYear()} NHMS. All rights reserved.</p>
                     </div>
                 </div>
             </body>
