@@ -163,12 +163,8 @@
                                     <textarea id="magBullets" class="form-control" rows="4"></textarea>
                                 </div>
                                 <div class="form-group">
-                                    <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Landing Page Button Text</label>
+                                    <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Button Text</label>
                                     <input type="text" id="magBtnText" class="form-control" required>
-                                </div>
-                                <div class="form-group">
-                                    <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Email Download Button Text</label>
-                                    <input type="text" id="magEmailBtnText" class="form-control" placeholder="Download Your PDF">
                                 </div>
                                 <div class="form-group">
                                     <label style="display: block; margin-bottom: 0.5rem; color: var(--color-text-secondary);">Mail Content (Use *text* for blue styling)</label>
@@ -519,17 +515,7 @@
                 const formattedMail = formatBlueText(rawMail).replace(/\\n/g, '<br>').replace(/{name}/g, 'John Doe');
                 const logoUrl = window.location.origin + '/assets/logo.png';
                 
-                const emailBtnText = (document.getElementById('magEmailBtnText').value || 'Download Your PDF').replace(/\\*/g, '');
-                const hasPdf = document.getElementById('existingPdfUrl').value || document.getElementById('magPdf').files.length > 0;
-                
-                let previewDownloadBtnHtml = '';
-                if (hasPdf) {
-                    previewDownloadBtnHtml = `
-                        <div style="text-align: center; margin: 30px 0;">
-                            <a href="javascript:void(0);" style="background-color: #0d9488; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px; display: inline-block;">${emailBtnText}</a>
-                        </div>
-                    `;
-                }
+                const emailBtnText = (document.getElementById('magBtnText').value || 'Download Your PDF').replace(/\*/g, '');
                 
                 const emailHtml = `
                 <!DOCTYPE html>
@@ -541,7 +527,9 @@
                         </div>
                         <div style="font-size: 16px;">
                             ${formattedMail}
-                            ${previewDownloadBtnHtml}
+                            <div style="text-align: center; margin: 30px 0;">
+                                <a href="javascript:void(0);" onclick="return false;" style="background-color: #0d9488; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px; display: inline-block;">${emailBtnText}</a>
+                            </div>
                         </div>
                         <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eeeeee; font-size: 12px; color: #888888;">
                             <p>You received this email because you requested a resource from NHMS.</p>
@@ -553,7 +541,7 @@
                 document.getElementById('emailPreviewFrame').srcdoc = emailHtml;
             }
 
-            const inputs = ['magSlug', 'magHeader', 'magTitle', 'magInfo', 'magBullets', 'magBtnText', 'magEmailBtnText', 'magMail', 'magPdf'];
+            const inputs = ['magSlug', 'magHeader', 'magTitle', 'magInfo', 'magBullets', 'magBtnText', 'magMail'];
             inputs.forEach(id => {
                 document.getElementById(id).addEventListener('input', updatePreview);
             });
@@ -616,7 +604,6 @@
                 document.getElementById('magInfo').value = mag.info || '';
                 document.getElementById('magBullets').value = mag.bullet_points || '';
                 document.getElementById('magBtnText').value = mag.button_text || '';
-                document.getElementById('magEmailBtnText').value = mag.email_button_text || '';
                 document.getElementById('magMail').value = mag.mail_content || '';
                 document.getElementById('existingPdfUrl').value = mag.pdf_url || '';
                 
@@ -684,7 +671,6 @@
                         bullet_points: document.getElementById('magBullets').value,
                         profile_photo: 'assets/john-atkins.jpeg', // Always default
                         button_text: document.getElementById('magBtnText').value,
-                        email_button_text: document.getElementById('magEmailBtnText').value,
                         mail_content: document.getElementById('magMail').value,
                         pdf_url: finalPdfUrl
                     };
