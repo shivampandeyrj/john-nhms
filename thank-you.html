@@ -42,10 +42,24 @@
                         <li style="margin-bottom: 0.75rem; font-size: 1rem;">A community of high-performers</li>
                     </ul>
 
-                    <a href="#" class="btn" style="width: 100%; padding: 1.25rem;">JOIN THE WEBINAR NOW</a>
+                    <a href="#" id="webinarBtn" class="btn" style="width: 100%; padding: 1.25rem;">JOIN THE WEBINAR NOW</a>
                 </div>
             </div>
         </div>
     </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch('/api/config?key=webinar_link');
+                const data = await res.json();
+                if (data.value) {
+                    document.getElementById('webinarBtn').href = data.value;
+                }
+            } catch (err) {
+                console.error('Failed to fetch webinar link', err);
+            }
+        });
+    </script>
 </body>
 </html>
