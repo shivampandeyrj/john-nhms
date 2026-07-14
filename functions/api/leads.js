@@ -1,3 +1,25 @@
+export async function onRequestGet({ request, env }) {
+    const cookieHeader = request.headers.get('Cookie');
+    if (!cookieHeader || !cookieHeader.includes('admin_session=true')) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+    }
+
+    try {
+        const stmt = env.DB.prepare('SELECT * FROM leads ORDER BY timestamp DESC');
+        const results = await stmt.all();
+
+        return new Response(JSON.stringify(results.results), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    } catch (e) {
+        return new Response(JSON.stringify({ error: "Server Error", details: e.message }), { 
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
+}
+
 export async function onRequestPost({ request, env }) {
     try {
         const body = await request.json();

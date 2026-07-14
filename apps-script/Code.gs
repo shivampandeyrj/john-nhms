@@ -4,11 +4,14 @@
  * This script processes form submissions, fetches custom Lead Magnet data from 
  * the Cloudflare D1 API, parses markdown-style text, and sends a branded HTML email.
  * It also pushes the lead back to Cloudflare D1.
+ * 
+ * NEW: Handles PDF uploads from Admin and creates 'lead maganet pdf dont delete' folder.
  */
 
 const API_BASE_URL = 'https://your-cloudflare-pages.pages.dev'; // Replace with actual Cloudflare Pages URL
 const SENDER_NAME = "John Atkins";
 const NOTIFICATION_EMAIL = "john@example.com"; // Replace with John's actual email
+const FOLDER_NAME = "lead maganet pdf dont delete";
 
 function doPost(e) {
   try {
@@ -16,8 +19,18 @@ function doPost(e) {
     let email = '';
     let phone = '';
     let magnetType = '';
+    
+    // Handle File Upload Action
+    if (e.parameter && e.parameter.action === 'upload') {
+      return handlePdfUpload(e);
+    }
+    
+    // Handle OTP sending action
+    if (e.parameter && e.parameter.action === 'sendOtp') {
+      return handleSendOtp(e);
+    }
 
-    // Handle both form-encoded and JSON data
+    // Handle both form-encoded and JSON data for Leads
     if (e.parameter && e.parameter.name) {
       name = e.parameter.name;
       email = e.parameter.email;
@@ -58,6 +71,15 @@ function doPost(e) {
 
     // Optional: Personalize the email by replacing {name} if the admin used it
     htmlMail = htmlMail.replace(/\{name\}/g, name);
+    
+    let downloadButton = '';
+    if (magnet.pdf_url) {
+      downloadButton = `
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${magnet.pdf_url}" style="background-color: #0d9488; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px; display: inline-block;">Download Your PDF</a>
+        </div>
+      `;
+    }
 
     // 3. Build Full HTML Template
     const fullHtmlEmail = `
@@ -70,6 +92,7 @@ function doPost(e) {
         
         <div style="font-size: 16px;">
           ${htmlMail}
+          ${downloadButton}
         </div>
         
         <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 14px; color: #6b7280;">
@@ -80,7 +103,7 @@ function doPost(e) {
       </html>
     `;
 
-    const plainTextMail = rawMail.replace(/\*(.*?)\*/g, '$1');
+    const plainTextMail = rawMail.replace(/\*(.*?)\*/g, '$1') + (magnet.pdf_url ? `\n\nDownload link: ${magnet.pdf_url}` : '');
 
     // 4. Send Email to Lead
     const subject = `Your resource is here: ${magnet.title || magnet.header || magnetType}`;
@@ -119,5 +142,84 @@ function doPost(e) {
     console.error(error);
     return ContentService.createTextOutput(JSON.stringify({ "status": "error", "message": error.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// Function to handle PDF upload from Admin Dashboard
+function handlePdfUpload(e) {
+  try {
+    const fileData = e.parameter.fileData;
+    const fileName = e.parameter.fileName || 'lead_magnet.pdf';
+    
+    if (!fileData) {
+       throw new Error("No file data provided.");
+    }
+    
+    // Decode base64
+    const decodedData = Utilities.base64Decode(fileData);
+    const blob = Utilities.newBlob(decodedData, MimeType.PDF, fileName);
+    
+    // Find or create folder
+    let folder;
+    const folders = DriveApp.getFoldersByName(FOLDER_NAME);
+    if (folders.hasNext()) {
+      folder = folders.next();
+    } else {
+      folder = DriveApp.createFolder(FOLDER_NAME);
+    }
+    
+    // Create file
+    const file = folder.createFile(blob);
+    
+    // Set permission to anyone with link can view
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    
+    // Return the public URL
+    const fileUrl = file.getUrl();
+    
+    return ContentService.createTextOutput(JSON.stringify({ 
+      status: "success", 
+      url: fileUrl 
+    })).setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ 
+      status: "error", 
+      message: error.toString() 
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// Handle CORS for admin upload
+function doOptions(e) {
+  const headers = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Max-Age": "86400"
+  };
+  return ContentService.createTextOutput("").setHeaders(headers);
+}
+
+function handleSendOtp(e) {
+  try {
+    const otp = e.parameter.otp;
+    if (!otp) throw new Error("No OTP provided.");
+    
+    MailApp.sendEmail(
+      NOTIFICATION_EMAIL,
+      "Your Admin Password Reset OTP",
+      `Hello John,\n\nSomeone requested an admin password change for the NHMS Lead Engine.\n\nYour OTP is: ${otp}\n\nIf you did not request this, please ignore this email.`
+    );
+    
+    return ContentService.createTextOutput(JSON.stringify({ 
+      status: "success", 
+      message: "OTP sent"
+    })).setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ 
+      status: "error", 
+      message: error.toString() 
+    })).setMimeType(ContentService.MimeType.JSON);
   }
 }

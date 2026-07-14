@@ -23,16 +23,16 @@ export async function onRequestPost({ request, env }) {
 
     try {
         const body = await request.json();
-        const { slug, header, info, bullet_points, profile_photo, title, button_text, mail_content } = body;
+        const { slug, header, info, bullet_points, profile_photo, title, button_text, mail_content, pdf_url } = body;
 
         if (!slug || !header) {
             return new Response(JSON.stringify({ error: "Slug and header are required" }), { status: 400 });
         }
 
         const stmt = env.DB.prepare(`
-            INSERT INTO lead_magnets (slug, header, info, bullet_points, profile_photo, title, button_text, mail_content)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `).bind(slug, header, info, bullet_points, profile_photo, title, button_text, mail_content);
+            INSERT INTO lead_magnets (slug, header, info, bullet_points, profile_photo, title, button_text, mail_content, pdf_url)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(slug, header, info, bullet_points, profile_photo, title, button_text, mail_content, pdf_url || null);
         
         const result = await stmt.run();
 

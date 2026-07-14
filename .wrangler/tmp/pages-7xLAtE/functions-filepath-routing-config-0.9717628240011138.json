@@ -1,0 +1,85 @@
+{
+  "routes": [
+    {
+      "routePath": "/api/auth/login",
+      "mountPath": "/api/auth",
+      "method": "POST",
+      "module": [
+        "api/auth/login.js:onRequestPost"
+      ]
+    },
+    {
+      "routePath": "/api/magnets/:id",
+      "mountPath": "/api/magnets",
+      "method": "DELETE",
+      "module": [
+        "api/magnets/[id].js:onRequestDelete"
+      ]
+    },
+    {
+      "routePath": "/api/magnets/:id",
+      "mountPath": "/api/magnets",
+      "method": "PUT",
+      "module": [
+        "api/magnets/[id].js:onRequestPut"
+      ]
+    },
+    {
+      "routePath": "/api/config",
+      "mountPath": "/api",
+      "method": "GET",
+      "module": [
+        "api/config.js:onRequestGet"
+      ]
+    },
+    {
+      "routePath": "/api/config",
+      "mountPath": "/api",
+      "method": "POST",
+      "module": [
+        "api/config.js:onRequestPost"
+      ]
+    },
+    {
+      "routePath": "/api/leads",
+      "mountPath": "/api",
+      "method": "POST",
+      "module": [
+        "api/leads.js:onRequestPost"
+      ]
+    },
+    {
+      "routePath": "/api/magnets",
+      "mountPath": "/api",
+      "method": "GET",
+      "module": [
+        "api/magnets.js:onRequestGet"
+      ]
+    },
+    {
+      "routePath": "/api/magnets",
+      "mountPath": "/api",
+      "method": "POST",
+      "module": [
+        "api/magnets.js:onRequestPost"
+      ]
+    },
+    {
+      "routePath": "/admin",
+      "mountPath": "/admin",
+      "method": "",
+      "middleware": [
+        "admin/_middleware.js:onRequest"
+      ]
+    },
+    {
+      "routePath": "/:slug*",
+      "mountPath": "/",
+      "method": "GET",
+      "module": [
+        "[[slug]].js:onRequestGet"
+      ]
+    }
+  ],
+  "baseURL": "/"
+}
