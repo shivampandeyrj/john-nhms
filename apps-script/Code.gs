@@ -8,9 +8,9 @@
  * NEW: Handles PDF uploads from Admin and creates 'lead maganet pdf dont delete' folder.
  */
 
-const API_BASE_URL = 'https://your-cloudflare-pages.pages.dev'; // Replace with actual Cloudflare Pages URL
+const API_BASE_URL = 'https://nhms-lead-engine.pages.dev';
 const SENDER_NAME = "John Atkins";
-const NOTIFICATION_EMAIL = "john@example.com"; // Replace with John's actual email
+const NOTIFICATION_EMAIL = "john@newhabitsmindsetshifts.com";
 const FOLDER_NAME = "lead maganet pdf dont delete";
 
 function doPost(e) {
