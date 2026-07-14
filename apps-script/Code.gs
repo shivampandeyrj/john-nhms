@@ -72,13 +72,6 @@ function handleSendLeadEmail(e) {
     // Continue execution even if group add fails (e.g., if they are already a member)
   }
 
-  // Send Alert Email to Admin
-  MailApp.sendEmail(
-    NOTIFICATION_EMAIL, 
-    `🔥 New Lead: ${name} (${magnetType})`, 
-    `You got a new lead!\n\nName: ${name}\nEmail: ${email}\nPhone: ${phone}\nMagnet: ${magnetType}`
-  );
-
   return ContentService.createTextOutput(JSON.stringify({ "status": "success" }))
       .setMimeType(ContentService.MimeType.JSON);
 }
