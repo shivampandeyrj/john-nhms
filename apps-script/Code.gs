@@ -125,13 +125,3 @@ function handlePdfUpload(e) {
     })).setMimeType(ContentService.MimeType.JSON);
 }
 
-// Handle CORS for admin upload
-function doOptions(e) {
-  const headers = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
-    "Access-Control-Max-Age": "86400"
-  };
-  return ContentService.createTextOutput("").setHeaders(headers);
-}
